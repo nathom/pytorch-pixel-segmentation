@@ -1,0 +1,75 @@
+\documentclass{article}
+
+\usepackage[preprint]{neurips_2023}
+
+\usepackage[utf8]{inputenc} % allow utf-8 input
+\usepackage[T1]{fontenc}    % use 8-bit T1 fonts
+\usepackage{hyperref}       % hyperlinks
+\usepackage{url}            % simple URL typesetting
+\usepackage{booktabs}       % professional-quality tables
+\usepackage{amsfonts}       % blackboard math symbols
+\usepackage{subcaption}
+\usepackage{enumitem}
+\usepackage{nicefrac}       % compact symbols for 1/2, etc.
+\usepackage{microtype}      % microtypography
+\usepackage{xcolor}         % colors
+% \usepackage[colorlinks]{hyperref}
+\usepackage[nameinlink,noabbrev]{cleveref}
+\crefformat{figure}{\textsuperscript{#2#1#3}}
+\crefformat{table}{\textsuperscript{#2#1#3}}
+\usepackage{titlesec}
+\usepackage{float}
+
+\setcounter{secnumdepth}{4}
+
+\titleformat{\paragraph}
+{\normalfont\normalsize\bfseries}{\theparagraph}{1em}{}
+\titlespacing*{\paragraph}
+{0pt}{3.25ex plus 1ex minus .2ex}{1.5ex plus .2ex}
+
+
+\title{An Exploration of Basic Methods for Handwritten Digit Classification}
+
+\author{
+	Brandon Szeto \thanks{160 lbs} \\
+	Jacobs School of Engineering \\
+	University of California, San Diego \\
+	San Diego, CA 92122 \\
+	\texttt{bszeto@ucsd.edu} \\
+	\AND
+	Darren Yu \thanks{130 lbs} \\
+	Jacobs School of Engineering \\
+	University of California, San Diego \\
+	San Diego, CA 92122 \\
+	\texttt{damiyu@ucsd.edu} \\
+	\AND
+	Nathaniel Thomas \thanks{200 lbs} \\
+	Jacobs School of Engineering \\
+	University of California, San Diego \\
+	San Diego, CA 92122 \\
+	\texttt{nathomas@ucsd.edu} \\
+}
+
+\begin{document}
+
+\maketitle
+
+\input{sections/abstract}
+
+\input{sections/intro}
+
+\input{sections/related}
+
+\input{sections/methods}
+
+\input{sections/results}
+
+\input{sections/discussion}
+
+\input{sections/contributions.tex}
+
+\input{sections/references}
+
+% \input{sections/conclusion}
+
+\end{document}
