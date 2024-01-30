@@ -1,0 +1,22 @@
+[tool.poetry]
+name = "darrennet"
+version = "0.1.0"
+description = "Darren"
+authors = ["Your Name <you@example.com>"]
+readme = "README.md"
+
+[tool.poetry.dependencies]
+python = "^3.10"
+torch = "^2.2.0"
+torchvision = "^0.17.0"
+click = "^8.1.7"
+
+[tool.poetry.scripts]
+darren = 'darrennet.main:main'
+
+[tool.poetry.group.dev.dependencies]
+ruff = "^0.1.15"
+
+[build-system]
+requires = ["poetry-core"]
+build-backend = "poetry.core.masonry.api"
