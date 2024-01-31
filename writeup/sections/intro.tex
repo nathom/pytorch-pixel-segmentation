@@ -1,1 +1,36 @@
 \section*{Introduction}
+
+Semantic segmentation is the task of assigning each pixel in an image a specified label. A single image can be partitioned into multiple meaningful segments corresponding to a given object or region of interest. Labels are assigned to individual pixels, marking boundaries and shapes. Altogether, this task has many applications in computer vision including but not limited to autonomous driving, video surveillance, and object recognition.
+
+In recent years, convolutional neural networks (CNNs) have proven to be an effective approach to semantic segmentation. Such models learn hierarchical features by capturing information using convolutional blocks. Convolutions and related techniques such as weight initialization, batch normalization, and pooling help avoid the flat, dense layers of a traditional fully connected neural network allowing for less computation and improved feature maps.
+
+\subsection*{Xavier Weight Initialization}
+In our architecture, we use Xavier weight initialization. In Uniform Xavier Initialization, a layer’s weights are chosen from a random uniform distribution bounded between
+
+\begin{equation}
+	\pm \displaystyle\frac{\sqrt{6}}{\sqrt{n_i + n_{i + 1}}}
+\end{equation}
+
+where $n_i$ is the number of incoming network connections and $n_{i + 1}$ is the number of outgoing network connections.
+
+In Normal Xavier Initialization, a layer’s weights are chosen from a normal distribution with
+
+\begin{equation}
+	\sigma = \displaystyle\frac{\sqrt{2}}{\sqrt{n_i + n_{i + 1}}}
+\end{equation}
+
+where $n_i$ is the number of incoming network connections and $n_{i + 1}$ is the number of outgoing network connections.
+
+The Xavier initialization was created in response to the problem of vanishing and exploding gradients in deep neural networks in the context of symmetric nonlinearities (sigmoid, tanh). The intuition is that the weights should not be intialized randomly, but rather proportional to the size of two connected layers. As a result, the variance of activations and gradients would be maintained through the layers of a deep network.
+
+\subsection*{Kaiming Weight Initialization}
+With the rise of ReLU, the nonlinearity can no longer be assumed to be symmetric. As such, the assumptions made by the Xavier Weight Initialization fall apart. In 2015, He et. al demonstrated that a ReLU layer typically has a standard deviation close to
+
+\begin{equation}
+	\sqrt{\displaystyle\frac{n_{i}}{2}}
+\end{equation}
+
+where $n_i$ is the number of incoming network connections. As such, weights initially chosen from a normal distribution should be weighted by $\sqrt{\frac{n_{i}}{2}}$, with bias tensors initalized to zero.
+
+\subsection*{Batch Normalization}
+
