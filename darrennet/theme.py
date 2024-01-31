@@ -27,4 +27,4 @@ def darren_print(text: str):
 
 
 def serious_darren_print(text: str):
-    click.secho(text, fg=random.choice(colors))
+    click.echo(text)
