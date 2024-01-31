@@ -14,3 +14,22 @@ darren --help
 ```
 
 3. Enjoy!
+
+## Contributing
+
+**Do not push to master directly!**
+
+1. Create a new branch from master
+
+```
+git checkout -b my-feature
+```
+2. Make your changes
+
+3. Push changes to remote
+```
+git push
+```
+4. Create a pull request
+5. Wait for review
+6. Get merged
