@@ -4,11 +4,10 @@ import time
 import numpy as np
 import torch
 import torchvision.transforms as standard_transforms
-from torch import nn
-from torch.utils.data import DataLoader
-
 import voc
 from basic_fcn import FCN
+from torch import nn
+from torch.utils.data import DataLoader
 
 
 class MaskToTensor(object):
