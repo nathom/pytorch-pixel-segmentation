@@ -1,7 +1,7 @@
 import numpy as np
 
 
-def iou(pred, target, n_classes=21):
+def compute_iou(pred, target, n_classes=21):
     """
     Calculate the Intersection over Union (IoU) for predictions.
 
@@ -23,7 +23,7 @@ def iou(pred, target, n_classes=21):
     return np.mean(iou_per_class)
 
 
-def pixel_acc(pred, target):
+def compute_pixel_accuracy(pred, target):
     """
     Calculate pixel-wise accuracy between predictions and targets.
 

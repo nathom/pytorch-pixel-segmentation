@@ -1,11 +1,11 @@
-import os
-
 from PIL import Image
 from torch.utils import data
 
+from .paths import DATA_DIR
+
 num_classes = 21
 ignore_label = 255
-root = "./data"
+root = DATA_DIR
 
 """
 color map
@@ -103,34 +103,21 @@ def make_dataset(mode):
     """
     assert mode in ["train", "val", "test"]
     items = []
+    voc_2007 = root / "VOCdevkit" / "VOC2007"
+    img_dir = voc_2007 / "JPEGImages"
+    mask_path = voc_2007 / "SegmentationClass"
     if mode == "train":
-        img_path = os.path.join(root, "VOCdevkit", "VOC2007", "JPEGImages")
-        mask_path = os.path.join(root, "VOCdevkit", "VOC2007", "SegmentationClass")
-        data_list = [
-            l.strip("\n")
-            for l in open(
-                os.path.join(
-                    root,
-                    "VOCdevkit",
-                    "VOC2007",
-                    "ImageSets",
-                    "Segmentation",
-                    "train.txt",
-                )
-            ).readlines()
-        ]
-        for it in data_list:
-            item = (
-                os.path.join(img_path, it + ".jpg"),
-                os.path.join(mask_path, it + ".png"),
-            )
-            items.append(item)
+        imgs = voc_2007 / "ImageSets" / "Segmentation" / "train.txt"
     elif mode == "val":
-        # TODO
-        pass
+        imgs = voc_2007 / "ImageSets" / "Segmentation" / "val.txt"
     else:
-        # TODO FOR TEST SET
-        pass
+        imgs = voc_2007 / "ImageSets" / "Segmentation" / "test.txt"
+
+    with open(imgs) as file:
+        items = [
+            (img_dir / f"{img}.jpg", mask_path / f"{img}.png")
+            for img in map(str.strip, file.readlines())
+        ]
 
     return items
 

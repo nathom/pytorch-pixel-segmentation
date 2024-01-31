@@ -1,24 +1,10 @@
-import gc
 import time
 
 import numpy as np
 import torch
-import torchvision.transforms as standard_transforms
-import voc
-from basic_fcn import FCN
-from torch import nn
-from torch.utils.data import DataLoader
 
-
-class MaskToTensor(object):
-    def __call__(self, img):
-        return torch.from_numpy(np.array(img, dtype=np.int32)).long()
-
-
-def init_weights(m):
-    if isinstance(m, nn.Conv2d) or isinstance(m, nn.ConvTranspose2d):
-        torch.nn.init.xavier_uniform_(m.weight.data)
-        torch.nn.init.normal_(m.bias.data)  # xavier not applicable for biases
+from . import util
+from .paths import CURRENT_MODEL_PATH
 
 
 # TODO Get class weights
@@ -27,63 +13,15 @@ def get_class_weights():
     raise NotImplementedError
 
 
-mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
-input_transform = standard_transforms.Compose(
-    [standard_transforms.ToTensor(), standard_transforms.Normalize(*mean_std)]
-)
-
-target_transform = MaskToTensor()
-
-train_dataset = voc.VOC(
-    "train", transform=input_transform, target_transform=target_transform
-)
-val_dataset = voc.VOC(
-    "val", transform=input_transform, target_transform=target_transform
-)
-test_dataset = voc.VOC(
-    "test", transform=input_transform, target_transform=target_transform
-)
-
-train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
-val_loader = DataLoader(dataset=val_dataset, batch_size=16, shuffle=False)
-test_loader = DataLoader(dataset=test_dataset, batch_size=16, shuffle=False)
-
-epochs = 20
-
-n_class = 21
-
-fcn_model = FCN(n_class=n_class)
-fcn_model.apply(init_weights)
-
-# TODO determine which device to use (cuda or cpu)
-# Check that MPS is available
-if torch.backends.mps.is_available():
-    device = torch.device("mps")
-
-elif torch.cuda.is_available():
-    device = torch.device("cuda")
-
-else:
-    if not torch.backends.mps.is_built():
-        raise Exception(
-            "MPS not available because the current PyTorch install was not "
-            "built with MPS enabled."
-        )
-    else:
-        raise Exception(
-            "MPS not available because the current MacOS version is not 12.3+ "
-            "and/or you do not have an MPS-enabled device on this machine."
-        )
-
-
-optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=0.001)
-
-criterion = torch.nn.CrossEntropyLoss()
-
-fcn_model = FCN.to(device)
-
-
-def train():
+def model_train(
+    model,
+    optimizer,
+    criterion,
+    device,
+    train_loader,
+    validation_loader,
+    epochs: int,
+):
     """
     Train a deep learning model using mini-batches.
 
@@ -108,7 +46,7 @@ def train():
 
             inputs = inputs.to(device)
             labels = labels.to(device)
-            outputs = fcn_model(inputs)
+            outputs = model(inputs)
 
             # Compute loss
             loss = criterion(outputs, labels)
@@ -124,15 +62,18 @@ def train():
 
         print("Finish epoch {}, time elapsed {}".format(epoch, time.time() - ts))
 
-        current_miou_score = val(epoch)
+        current_miou_score, _ = evaluate_validation(
+            model, criterion, epoch, validation_loader
+        )
 
         if current_miou_score > best_iou_score:
             best_iou_score = current_miou_score
+            torch.save(model.state_dict(), CURRENT_MODEL_PATH)
             # save the best model
 
 
 # TODO
-def val(epoch):
+def evaluate_validation(model, criterion, epoch, val_loader):
     """
     Validate the deep learning model on a validation dataset.
 
@@ -153,27 +94,34 @@ def val(epoch):
     -------
         tuple: Mean IoU score and mean loss for this validation epoch.
     """
-    fcn_model.eval()  # Put in eval mode (disables batchnorm/dropout) !
+    model.eval()  # Put in eval mode (disables batchnorm/dropout) !
 
     losses = []
     mean_iou_scores = []
     accuracy = []
 
-    with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
-        for iter, (input, label) in enumerate(val_loader):
-            pass
+    with torch.no_grad():
+        for input, label in val_loader:
+            output = model(input)
+            loss = criterion(output, label)
+            losses.append(loss.item())
+            iou = util.compute_iou(output, label)
+            mean_iou_scores.append(iou)
+
+            acc = util.compute_pixel_accuracy(output, label)
+            accuracy.append(acc)
 
     print(f"Loss at epoch: {epoch} is {np.mean(losses)}")
     print(f"IoU at epoch: {epoch} is {np.mean(mean_iou_scores)}")
     print(f"Pixel acc at epoch: {epoch} is {np.mean(accuracy)}")
 
-    fcn_model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
+    model.train()
 
-    return np.mean(mean_iou_scores)
+    return np.mean(mean_iou_scores), np.mean(accuracy)
 
 
 # TODO
-def modelTest():
+def model_test(model, criterion, test_loader):
     """
     Test the deep learning model using a test dataset.
 
@@ -190,16 +138,27 @@ def modelTest():
         None. Outputs average test metrics to the console.
     """
 
-    fcn_model.eval()  # Put in eval mode (disables batchnorm/dropout) !
+    model.eval()  # Put in eval mode (disables batchnorm/dropout) !
+
+    losses = []
+    mean_iou_scores = []
+    accuracy = []
 
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
-        for iter, (input, label) in enumerate(test_loader):
-            pass
+        for input, label in test_loader:
+            output = model(input)
+            loss = criterion(output, label)
+            losses.append(loss.item())
+            iou = util.compute_iou(output, label)
+            mean_iou_scores.append(iou)
 
-    fcn_model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
+            acc = util.compute_pixel_accuracy(output, label)
+            accuracy.append(acc)
+
+    model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
 
 
-def export_model(inputs):
+def export_model(fcn_model, device, inputs):
     """
     Export the output of the model for given inputs.
 
@@ -229,13 +188,3 @@ def export_model(inputs):
     fcn_model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
 
     return output_image
-
-
-if __name__ == "__main__":
-    val(0)  # show the accuracy before training
-    train()
-    modelTest()
-
-    # housekeeping
-    gc.collect()
-    torch.cuda.empty_cache()
