@@ -11,6 +11,7 @@ torch = "^2.2.0"
 torchvision = "^0.17.0"
 click = "^8.1.7"
 click-help-colors = "^0.9.4"
+rich = "^13.7.0"
 
 [tool.poetry.scripts]
 darren = 'darrennet.main:main'
