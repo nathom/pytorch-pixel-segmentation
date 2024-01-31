@@ -8,6 +8,7 @@ import voc
 from basic_fcn import FCN
 from torch import nn
 from torch.utils.data import DataLoader
+from util import iou, pixel_acc
 
 
 class MaskToTensor(object):
@@ -161,7 +162,10 @@ def val(epoch):
 
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
         for iter, (input, label) in enumerate(val_loader):
-            pass
+            output = fcn_model(input)
+            losses.append(criterion(output, label))
+            mean_iou_scores.append(iou(output, label))
+            accuracy.append(pixel_acc(output, label))
 
     print(f"Loss at epoch: {epoch} is {np.mean(losses)}")
     print(f"IoU at epoch: {epoch} is {np.mean(mean_iou_scores)}")
@@ -192,9 +196,28 @@ def modelTest():
 
     fcn_model.eval()  # Put in eval mode (disables batchnorm/dropout) !
 
+    total_loss = 0.0
+    total_iou = 0.0
+    total_pixel_acc = 0.0
+    total_samples = 0
+
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
         for iter, (input, label) in enumerate(test_loader):
-            pass
+            output = fcn_model(input)
+            total_loss += criterion(output, label)
+            total_pixel_acc += pixel_acc(output, label)
+            total_iou += iou(output, label)
+            total_samples += input.size()
+
+    # Calculate averages
+    avg_loss = total_loss / total_samples
+    avg_iou = total_iou / total_samples
+    avg_pixel_acc = total_pixel_acc / total_samples
+
+    # Print metrics
+    print(f'Average Loss: {avg_loss:.3f}')
+    print(f'Average IoU: {avg_iou:.3f}')
+    print(f'Average Pixel Accuracy: {avg_pixel_acc:.3f}')
 
     fcn_model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
 
