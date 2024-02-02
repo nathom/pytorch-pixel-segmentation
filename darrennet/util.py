@@ -45,6 +45,7 @@ def compute_pixel_accuracy(pred, target):
         float: Pixel-wise accuracy.
     """
     pred = pred.data.cpu().numpy()
+    target = target.data.cpu().numpy()
     pred = np.argmax(pred, axis=1)
     assert pred.shape == target.shape
     return np.sum(pred == target) / pred.size
