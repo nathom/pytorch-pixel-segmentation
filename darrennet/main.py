@@ -93,7 +93,7 @@ def cook():
     model_train(
         fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs
     )
-    model_test(fcn_model, criterion, test_loader)
+    model_test(fcn_model, criterion, test_loader, device)
 
 
 @main.command(cls=HelpColorsCommand)

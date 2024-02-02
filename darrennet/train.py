@@ -68,7 +68,7 @@ def model_train(
             print("Finish epoch {}, time elapsed {}".format(epoch, time.time() - ts))
 
             current_miou_score, _ = evaluate_validation(
-                model, criterion, epoch, validation_loader
+                model, criterion, epoch, validation_loader, device
             )
 
             if current_miou_score > best_iou_score:
@@ -79,7 +79,7 @@ def model_train(
 
 
 # TODO
-def evaluate_validation(model, criterion, epoch, val_loader):
+def evaluate_validation(model, criterion, epoch, val_loader, device):
     """
     Validate the deep learning model on a validation dataset.
 
@@ -108,6 +108,8 @@ def evaluate_validation(model, criterion, epoch, val_loader):
 
     with torch.no_grad():
         for input, label in val_loader:
+            input = input.to(device)
+            label = label.to(device)
             output = model(input)
             loss = criterion(output, label)
             losses.append(loss.item())
@@ -127,7 +129,7 @@ def evaluate_validation(model, criterion, epoch, val_loader):
 
 
 # TODO
-def model_test(model, criterion, test_loader):
+def model_test(model, criterion, test_loader, device):
     """
     Test the deep learning model using a test dataset.
 
@@ -152,6 +154,8 @@ def model_test(model, criterion, test_loader):
 
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
         for input, label in test_loader:
+            input = input.to(device)
+            label = label.to(device)
             output = model(input)
             loss = criterion(output, label)
             losses.append(loss.item())
