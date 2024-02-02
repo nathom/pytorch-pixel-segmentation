@@ -61,7 +61,6 @@ def find_device() -> torch.device:
 @click.option("-s", "--serious", help="Turn on Serious Darren mode.", is_flag=True)
 def main(serious):
     """Welcome to DarrenNet, the world's most advanced CNN for pixel segmentation."""
-    global print_function
     theme.set_serious(serious)
 
 
