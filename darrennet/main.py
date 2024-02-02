@@ -34,7 +34,7 @@ def init_weights(model):
         torch.nn.init.normal_(model.bias.data)  # xavier not applicable for biases
 
 
-def find_device():
+def find_device() -> torch.device:
     if torch.backends.mps.is_available():
         return torch.device("mps")
     elif torch.cuda.is_available():
@@ -62,16 +62,13 @@ def find_device():
 def main(serious):
     """Welcome to DarrenNet, the world's most advanced CNN for pixel segmentation."""
     global print_function
-    if serious:
-        print_function = theme.serious_darren_print
-    else:
-        print_function = theme.darren_print
+    theme.set_serious(serious)
 
 
 @main.command(cls=HelpColorsCommand)
 def download():
     """Download and save the dataset."""
-    print_function("Downloading dataset...")
+    theme.print("Downloading dataset...")
     download_data()
 
 
@@ -92,7 +89,7 @@ def cook():
     train_loader, val_loader, test_loader = load_dataset(
         input_transform, MaskToTensor()
     )
-    print_function("Training network...")
+    theme.print("Training network...")
     model_train(
         fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs
     )
@@ -102,7 +99,7 @@ def cook():
 @main.command(cls=HelpColorsCommand)
 def insight():
     """Run inference on the model."""
-    print_function("Loading network and running inference...")
+    theme.print("Loading network and running inference...")
 
 
 if __name__ == "__main__":
