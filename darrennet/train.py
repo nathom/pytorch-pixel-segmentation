@@ -2,6 +2,7 @@ import time
 
 import numpy as np
 import torch
+from rich.progress import Progress
 
 from . import util
 from .paths import CURRENT_MODEL_PATH
@@ -39,37 +40,42 @@ def model_train(
 
     best_iou_score = 0.0
 
-    for epoch in range(epochs):
-        ts = time.time()
-        for iter, (inputs, labels) in enumerate(train_loader):
-            optimizer.zero_grad()
+    with Progress() as prog:
+        epoch_bar = prog.add_task("Epochs", total=epochs)
+        for epoch in range(epochs):
+            ts = time.time()
+            train_bar = prog.add_task("Train", total=len(train_loader))
+            for iter, (inputs, labels) in enumerate(train_loader):
+                optimizer.zero_grad()
 
-            inputs = inputs.to(device)
-            labels = labels.to(device)
-            outputs = model(inputs)
+                inputs = inputs.to(device)
+                labels = labels.to(device)
+                outputs = model(inputs)
 
-            # Compute loss
-            loss = criterion(outputs, labels)
+                # Compute loss
+                loss = criterion(outputs, labels)
 
-            # Backpropagate
-            loss.backward()
+                # Backpropagate
+                loss.backward()
 
-            # Update weights
-            optimizer.step()
+                # Update weights
+                optimizer.step()
 
-            if iter % 10 == 0:
-                print("epoch{}, iter{}, loss: {}".format(epoch, iter, loss.item()))
+                if iter % 10 == 0:
+                    print("epoch{}, iter{}, loss: {}".format(epoch, iter, loss.item()))
+                prog.update(train_bar, advance=1)
 
-        print("Finish epoch {}, time elapsed {}".format(epoch, time.time() - ts))
+            print("Finish epoch {}, time elapsed {}".format(epoch, time.time() - ts))
 
-        current_miou_score, _ = evaluate_validation(
-            model, criterion, epoch, validation_loader
-        )
+            current_miou_score, _ = evaluate_validation(
+                model, criterion, epoch, validation_loader
+            )
 
-        if current_miou_score > best_iou_score:
-            best_iou_score = current_miou_score
-            torch.save(model.state_dict(), CURRENT_MODEL_PATH)
-            # save the best model
+            if current_miou_score > best_iou_score:
+                best_iou_score = current_miou_score
+                torch.save(model.state_dict(), CURRENT_MODEL_PATH)
+                # save the best model
+            prog.update(epoch_bar, advance=1)
 
 
 # TODO
