@@ -1,8 +1,13 @@
-import time
-
 import numpy as np
 import torch
-from rich.progress import Progress
+from rich.console import console
+from rich.progress import (
+    BarColumn,
+    Progress,
+    TextColumn,
+    TimeElapsedColumn,
+    TimeRemainingColumn,
+)
 
 from . import util
 from .paths import CURRENT_MODEL_PATH
@@ -39,13 +44,23 @@ def model_train(
     """
 
     best_iou_score = 0.0
+    bad_epochs = 0
+    patience = 3
 
-    with Progress() as prog:
-        epoch_bar = prog.add_task("Epochs", total=epochs)
+    progress = Progress(
+        TextColumn("[cyan]{task.description}"),
+        BarColumn(bar_width=None),
+        "[progress.percentage]{task.percentage:>3.1f}%",
+        "•",
+        TimeRemainingColumn(),
+        TimeElapsedColumn(),
+    )
+    with progress as prog:
+        epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
-            ts = time.time()
-            train_bar = prog.add_task("Train", total=len(train_loader))
-            for iter, (inputs, labels) in enumerate(train_loader):
+            train_bar = prog.add_task(f"Epoch {epoch}", total=len(train_loader))
+            loss = None
+            for inputs, labels in train_loader:
                 optimizer.zero_grad()
 
                 inputs = inputs.to(device)
@@ -61,13 +76,14 @@ def model_train(
                 # Update weights
                 optimizer.step()
 
-                if iter % 10 == 0:
-                    print("epoch{}, iter{}, loss: {}".format(epoch, iter, loss.item()))
-                prog.update(train_bar, advance=1)
+                prog.update(
+                    train_bar,
+                    advance=1,
+                    description=f"Epoch {epoch}, IOU: n/a, PA: n/a, Loss: {loss.item():.2f}",
+                )
 
-            print("Finish epoch {}, time elapsed {}".format(epoch, time.time() - ts))
 
-            current_miou_score, _ = evaluate_validation(
+            current_miou_score, pixel_acc, loss = evaluate_validation(
                 model, criterion, epoch, validation_loader, device
             )
 
@@ -75,7 +91,23 @@ def model_train(
                 best_iou_score = current_miou_score
                 torch.save(model.state_dict(), CURRENT_MODEL_PATH)
                 # save the best model
-            prog.update(epoch_bar, advance=1)
+            else:
+                bad_epochs += 1
+
+            if bad_epochs >= patience:
+                console.print(f"Patience ({patience}) exceed, ending training.")
+                break
+
+            assert loss is not None
+            prog.update(
+                train_bar,
+                description=f"Epoch {epoch}, IOU: {current_miou_score:.2f}, PA: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
+            )
+            prog.update(
+                epoch_bar,
+                advance=1,
+                description=f"All Epochs, IOU: {current_miou_score:.2f}",
+            )
 
 
 # TODO
@@ -119,13 +151,13 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
             acc = util.compute_pixel_accuracy(output, label)
             accuracy.append(acc)
 
-    print(f"Loss at epoch: {epoch} is {np.mean(losses)}")
-    print(f"IoU at epoch: {epoch} is {np.mean(mean_iou_scores)}")
-    print(f"Pixel acc at epoch: {epoch} is {np.mean(accuracy)}")
+    # print(f"Loss at epoch: {epoch} is {np.mean(losses)}")
+    # print(f"IoU at epoch: {epoch} is {np.mean(mean_iou_scores)}")
+    # print(f"Pixel acc at epoch: {epoch} is {np.mean(accuracy)}")
 
     model.train()
 
-    return np.mean(mean_iou_scores), np.mean(accuracy)
+    return np.mean(mean_iou_scores), np.mean(accuracy), loss
 
 
 # TODO
