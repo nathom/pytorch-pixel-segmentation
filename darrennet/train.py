@@ -1,6 +1,8 @@
 import numpy as np
 import torch
-from rich.console import console
+
+from rich.console import Console
+
 from rich.progress import (
     BarColumn,
     Progress,
@@ -11,6 +13,8 @@ from rich.progress import (
 
 from . import util
 from .paths import CURRENT_MODEL_PATH
+
+console = Console()
 
 
 # TODO Get class weights
@@ -54,6 +58,7 @@ def model_train(
         "•",
         TimeRemainingColumn(),
         TimeElapsedColumn(),
+        console=console,
     )
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
