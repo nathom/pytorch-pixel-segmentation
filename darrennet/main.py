@@ -40,16 +40,8 @@ def find_device() -> torch.device:
     elif torch.cuda.is_available():
         return torch.device("cuda")
     else:
-        if not torch.backends.mps.is_built():
-            raise Exception(
-                "MPS not available because the current PyTorch install was not "
-                "built with MPS enabled."
-            )
-        else:
-            raise Exception(
-                "MPS not available because the current MacOS version is not 12.3+ "
-                "and/or you do not have an MPS-enabled device on this machine."
-            )
+        theme.print("WARNING: using CPU!!")
+        return torch.device("cpu")
 
 
 @click.group(
