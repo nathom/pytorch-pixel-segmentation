@@ -33,3 +33,4 @@ git push
 4. Create a pull request
 5. Wait for review
 6. Get merged
+7. Delete branch
