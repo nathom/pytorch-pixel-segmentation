@@ -166,7 +166,7 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
 
     model.train()
 
-    return np.mean(mean_iou_scores), np.mean(accuracy)
+    return np.mean(mean_iou_scores), np.mean(accuracy), loss
 
 
 # TODO

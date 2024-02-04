@@ -1,6 +1,7 @@
 import click
 import numpy as np
 import torch
+import os
 import torchvision.transforms as standard_transforms
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 from rich.traceback import install
@@ -10,6 +11,9 @@ from . import theme
 from .basic_fcn import FCN
 from .dataset import download_data, load_dataset
 from .train import model_test, model_train
+
+models_dir = "./models"
+os.makedirs(models_dir, exist_ok=True)
 
 install(show_locals=True)
 
@@ -98,25 +102,23 @@ def cook(save):
         path = os.path.join(models_dir, save + ".pkl")
         print(f"Saving model to {path}")
         torch.save(fcn_model, path)
-    # model_test(fcn_model, criterion, test_loader, device)
 
 
 @click.option("-l", "--load", help="Loads cached model.")
 @main.command(cls=HelpColorsCommand)
 def insight(load):
     """Run inference on the model."""
+    path = os.path.join(models_dir, load + ".pkl")
     model = torch.load(path)
+
     theme.print("Loading network and running inference...")
     device = find_device()
-    fcn_model = FCN(n_class=n_class)
     criterion = torch.nn.CrossEntropyLoss()
     _, _, test_loader = load_dataset(
         input_transform, MaskToTensor()
     )
 
-    model_test(fcn_model, criterion, test_loader, device)
-    # export_model(fcn_model, device, inputs)
-
+    model_test(model, criterion, test_loader, device)
 
 if __name__ == "__main__":
     main()
