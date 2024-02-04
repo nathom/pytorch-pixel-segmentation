@@ -71,8 +71,9 @@ def download():
     download_data()
 
 
+@click.option("-s", "--save", help="Saves to model directory with specified name.")
 @main.command(cls=HelpColorsCommand)
-def cook():
+def cook(save):
     """Train the model."""
     device = find_device()
     fcn_model = FCN(n_class=n_class)
@@ -93,9 +94,14 @@ def cook():
     model_train(
         fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs, cos_opt
     )
+    if save:
+        path = os.path.join(models_dir, save + ".pkl")
+        print(f"Saving model to {path}")
+        torch.save(fcn_model, path)
     # model_test(fcn_model, criterion, test_loader, device)
 
 
+@click.option("-l", "--load", help="Loads cached model.")
 @main.command(cls=HelpColorsCommand)
 def insight():
     """Run inference on the model."""
@@ -103,7 +109,6 @@ def insight():
     device = find_device()
     fcn_model = FCN(n_class=n_class)
     criterion = torch.nn.CrossEntropyLoss()
-
     _, _, test_loader = load_dataset(
         input_transform, MaskToTensor()
     )
