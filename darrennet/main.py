@@ -81,6 +81,7 @@ def cook():
     # TODO determine which device to use (cuda or cpu)
     # Check that MPS is available
     optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=0.001)
+    optimizer = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     criterion = torch.nn.CrossEntropyLoss()
 
