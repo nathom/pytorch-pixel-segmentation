@@ -103,8 +103,9 @@ def cook(save):
 
 @click.option("-l", "--load", help="Loads cached model.")
 @main.command(cls=HelpColorsCommand)
-def insight():
+def insight(load):
     """Run inference on the model."""
+    model = torch.load(path)
     theme.print("Loading network and running inference...")
     device = find_device()
     fcn_model = FCN(n_class=n_class)
