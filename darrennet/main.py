@@ -81,7 +81,7 @@ def cook():
     # TODO determine which device to use (cuda or cpu)
     # Check that MPS is available
     optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=0.001)
-    optimizer = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    cos_opt = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     criterion = torch.nn.CrossEntropyLoss()
 
@@ -91,15 +91,25 @@ def cook():
     )
     theme.print("Training network...")
     model_train(
-        fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs
+        fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs, cos_opt
     )
-    model_test(fcn_model, criterion, test_loader, device)
+    # model_test(fcn_model, criterion, test_loader, device)
 
 
 @main.command(cls=HelpColorsCommand)
 def insight():
     """Run inference on the model."""
     theme.print("Loading network and running inference...")
+    device = find_device()
+    fcn_model = FCN(n_class=n_class)
+    criterion = torch.nn.CrossEntropyLoss()
+
+    _, _, test_loader = load_dataset(
+        input_transform, MaskToTensor()
+    )
+
+    model_test(fcn_model, criterion, test_loader, device)
+    # export_model(fcn_model, device, inputs)
 
 
 if __name__ == "__main__":
