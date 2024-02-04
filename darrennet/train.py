@@ -31,6 +31,7 @@ def model_train(
     train_loader,
     validation_loader,
     epochs: int,
+    cos_opt,
 ):
     """
     Train a deep learning model using mini-batches.
@@ -80,6 +81,7 @@ def model_train(
 
                 # Update weights
                 optimizer.step()
+                cos_opt.step()
 
                 prog.update(
                     train_bar,
@@ -147,8 +149,10 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
         for input, label in val_loader:
             input = input.to(device)
             label = label.to(device)
+
             output = model(input)
             loss = criterion(output, label)
+
             losses.append(loss.item())
             iou = util.compute_iou(output, label)
             mean_iou_scores.append(iou)
@@ -162,7 +166,7 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
 
     model.train()
 
-    return np.mean(mean_iou_scores), np.mean(accuracy), loss
+    return np.mean(mean_iou_scores), np.mean(accuracy)
 
 
 # TODO
@@ -202,6 +206,10 @@ def model_test(model, criterion, test_loader, device):
             acc = util.compute_pixel_accuracy(output, label)
             accuracy.append(acc)
 
+    print(f"Average Loss: {np.mean(losses)}")
+    print(f"Average IoU Score: {np.mean(mean_iou_scores)}")
+    print(f"Average Pixel Accuracy: {np.mean(accuracy)}")
+
     model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
 
 
@@ -225,13 +233,27 @@ def export_model(fcn_model, device, inputs):
 
     fcn_model.eval()  # Put in eval mode (disables batchnorm/dropout) !
 
-    saved_model_path = "Fill Path To Best Model"
-    # TODO Then Load your best model using saved_model_path
+    path = "models/best.pth"
 
+    # TODO Then Load your best model using saved_model_path
+    try:
+        checkpoint = torch.load(path, map_location=device)
+        fcn_model.load_state_dict(checkpoint['model_state_dict'])
+        print("Best model loaded successfully.")
+    except FileNotFoundError:
+        print(f"Error: Model checkpoint not found at {path}. Please check the path.")
+        return None
+    except Exception as e:
+        print(f"Error loading model: {e}")
+        return None
+
+    fcn_model.to(device)
     inputs = inputs.to(device)
 
-    output_image = fcn_model(inputs)
+    with torch.no_grad():
+        output_image = fcn_model(inputs)
 
-    fcn_model.train()  # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
+    # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
+    fcn_model.train()  
 
     return output_image
