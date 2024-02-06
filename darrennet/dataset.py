@@ -66,12 +66,19 @@ def get_frequency_spectrum():
     train, val, test = load_dataset(None, input_transform, mask_transform)
     all_train = np.concatenate([label for _, label in train]).flatten()
     unique_values, counts = np.unique(all_train, return_counts=True)
+
     freq = dict(zip(unique_values, counts))
     counts = np.array([freq[i] for i in range(21)])
     console.print("Frequency of each class")
     console.print(freq)
     total = counts.sum()
+
     inv_freq = total / counts
     console.print("Incorrect guess penalty (the inverse of relative frequency):")
     console.print(list(inv_freq))
     console.print(list(inv_freq / inv_freq.max()))
+
+    weights = 1.0 / np.log(1.02 + counts / total)
+
+    console.print("Log calculated weights:")
+    console.print(list(weights))

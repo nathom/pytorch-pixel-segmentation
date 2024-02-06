@@ -9,6 +9,7 @@ from torchvision.transforms import v2
 from . import theme
 from .basic_fcn import FCN
 from .dataset import download_data, get_frequency_spectrum, load_dataset
+from .erfnet import ERF
 from .train import model_test, model_train
 from .util import find_device
 
@@ -53,46 +54,53 @@ def info():
 
 @click.option("-w", "--weight", help="Weight loss by inverse frequency.", is_flag=True)
 @click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
+@click.option("-e", "--erfnet", help="Use ERFNet", is_flag=True)
 @main.command(cls=HelpColorsCommand)
-def cook(weight, augment):
+def cook(weight, augment, erfnet):
     """Train the model."""
-    epochs = 20
+    epochs = 150
     n_class = 21
     device = find_device()
-    fcn_model = FCN(n_class=n_class)
-    fcn_model.apply(init_weights)
+
+    if erfnet:
+        theme.print("Using ERFNet")
+        fcn_model = ERF(num_classes=n_class, input_channels=3)
+        learning_rate = 5e-4
+    else:
+        theme.print("Using FCN")
+        fcn_model = FCN(n_class=n_class)
+        fcn_model.apply(init_weights)
+        learning_rate = 0.001
 
     if weight:
         theme.print("Weighting loss by inverse class frequency")
         # calculated with dataset:get_freqency_spectrum
         weights = torch.Tensor(
             [
-                0.002995969342219151,
-                0.47902764537654907,
-                0.5324441987423122,
-                0.25992938107232816,
-                0.4927520784480921,
-                0.3255679657459964,
-                0.11598093326643251,
-                0.30993979538475974,
-                0.12336882555439917,
-                0.20796595530283946,
-                0.29532387888079725,
-                0.17547388957632715,
-                0.16052417758703308,
-                0.26889475704663635,
-                0.2918671161786431,
-                0.025474723651872998,
-                0.7314641941710704,
-                1.0,
-                0.13692179197839105,
-                0.1928081677593714,
-                0.17702469844916716,
+                1.7765756464776548,
+                41.14605024958389,
+                41.923407019122614,
+                35.610010988370455,
+                41.358926183434754,
+                37.852584879629106,
+                26.134633569759732,
+                37.38219759224805,
+                26.90527861619218,
+                33.178439919075075,
+                36.909468575338494,
+                31.208512027144945,
+                30.14330606533797,
+                35.96210892771767,
+                36.792639486832435,
+                9.879025266255747,
+                43.95102624926591,
+                45.53468859040118,
+                28.199209349833556,
+                32.31202739148328,
+                31.31266311222871,
             ]
         ).to(device)
-        learning_rate = 0.01
     else:
-        learning_rate = 0.001
         weights = None
 
     augment_transforms: list[v2.Transform] = [v2.ToImage()]
@@ -112,7 +120,9 @@ def cook(weight, augment):
 
     augment_transform = v2.Compose(augment_transforms)
 
-    optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=learning_rate)
+    optimizer = torch.optim.Adam(
+        params=fcn_model.parameters(), lr=learning_rate, weight_decay=1e-4
+    )
     criterion = torch.nn.CrossEntropyLoss(weight=weights)
 
     fcn_model = fcn_model.to(device)
