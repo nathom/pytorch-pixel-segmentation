@@ -1,6 +1,8 @@
 import click
 import numpy as np
 import torch
+import os
+import torchvision.transforms as standard_transforms
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 from rich.traceback import install
 from torch import nn
@@ -12,6 +14,9 @@ from .dataset import download_data, get_frequency_spectrum, load_dataset
 from .erfnet import ERF
 from .train import model_test, model_train
 from .util import find_device
+
+models_dir = "./models"
+os.makedirs(models_dir, exist_ok=True)
 
 install(show_locals=True)
 
@@ -46,7 +51,6 @@ def download():
     theme.print("Downloading dataset...")
     download_data()
 
-
 @main.command(cls=HelpColorsCommand)
 def info():
     get_frequency_spectrum()
@@ -61,7 +65,7 @@ def cook(weight, augment, erfnet):
     epochs = 150
     n_class = 21
     device = find_device()
-
+    
     if erfnet:
         theme.print("Using ERFNet")
         fcn_model = ERF(num_classes=n_class, input_channels=3)
@@ -124,6 +128,8 @@ def cook(weight, augment, erfnet):
         params=fcn_model.parameters(), lr=learning_rate, weight_decay=1e-4
     )
     criterion = torch.nn.CrossEntropyLoss(weight=weights)
+    
+    cos_opt = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     fcn_model = fcn_model.to(device)
     mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
@@ -154,16 +160,29 @@ def cook(weight, augment, erfnet):
 
     theme.print("Training network...")
     model_train(
-        fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs
+        fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs, cos_opt
     )
-    model_test(fcn_model, criterion, test_loader, device)
+    if save:
+        path = os.path.join(models_dir, save + ".pkl")
+        print(f"Saving model to {path}")
+        torch.save(fcn_model, path)
 
 
+@click.option("-l", "--load", help="Loads cached model.")
 @main.command(cls=HelpColorsCommand)
-def insight():
+def insight(load):
     """Run inference on the model."""
-    theme.print("Loading network and running inference...")
+    path = os.path.join(models_dir, load + ".pkl")
+    model = torch.load(path)
 
+    theme.print("Loading network and running inference...")
+    device = find_device()
+    criterion = torch.nn.CrossEntropyLoss()
+    _, _, test_loader = load_dataset(
+        input_transform, MaskToTensor()
+    )
+
+    model_test(model, criterion, test_loader, device)
 
 if __name__ == "__main__":
     main()
