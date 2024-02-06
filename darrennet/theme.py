@@ -1,5 +1,10 @@
 import random
 
+from rich.console import Console
+
+console = Console()
+
+
 import click
 
 _serious: bool = False
