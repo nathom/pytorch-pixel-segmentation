@@ -1,4 +1,21 @@
 import numpy as np
+import torch
+from torchmetrics import JaccardIndex
+
+from . import theme
+
+
+def find_device() -> torch.device:
+    if torch.backends.mps.is_available():
+        return torch.device("mps")
+    elif torch.cuda.is_available():
+        return torch.device("cuda")
+    else:
+        theme.print("WARNING: using CPU!!")
+        return torch.device("cpu")
+
+
+jaccard = JaccardIndex(task="multiclass", num_classes=21)
 
 
 def compute_iou(pred, target, n_classes=21):
@@ -15,9 +32,12 @@ def compute_iou(pred, target, n_classes=21):
     -------
         float: Mean IoU across all classes.
     """
-    pred = pred.data.cpu().numpy()
-    target = target.data.cpu().numpy()  # (16, 224, 224)
-    pred = np.argmax(pred, axis=1)  # (16, 224, 224)
+
+    # pred = pred.data.cpu().numpy()
+    # target = target.data.cpu().numpy()  # (16, 224, 224)
+    # pred = np.argmax(pred, axis=1)  # (16, 224, 224)
+    pred = torch.argmax(pred, dim=1).cpu()
+    return jaccard(pred, target.cpu())
 
     iou = 0.0
     for c in range(n_classes):

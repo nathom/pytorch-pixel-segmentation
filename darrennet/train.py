@@ -1,8 +1,6 @@
 import numpy as np
 import torch
-
 from rich.console import Console
-
 from rich.progress import (
     BarColumn,
     Progress,
@@ -50,7 +48,7 @@ def model_train(
 
     best_iou_score = 0.0
     bad_epochs = 0
-    patience = 3
+    patience = 6
 
     progress = Progress(
         TextColumn("[cyan]{task.description}"),
@@ -64,15 +62,14 @@ def model_train(
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
-            train_bar = prog.add_task(f"Epoch {epoch}", total=len(train_loader))
+            train_bar = prog.add_task(f"Epoch {epoch}.", total=len(train_loader))
             loss = None
             for inputs, labels in train_loader:
-                optimizer.zero_grad()
-
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 outputs = model(inputs)
 
+                optimizer.zero_grad()
                 # Compute loss
                 loss = criterion(outputs, labels)
 
@@ -86,9 +83,8 @@ def model_train(
                 prog.update(
                     train_bar,
                     advance=1,
-                    description=f"Epoch {epoch}, IOU: n/a, PA: n/a, Loss: {loss.item():.2f}",
+                    description=f"Epoch {epoch}, IOU: n/a, Acc: n/a, Loss: {loss.item():.2f}",
                 )
-
 
             current_miou_score, pixel_acc, loss = evaluate_validation(
                 model, criterion, epoch, validation_loader, device
@@ -97,6 +93,7 @@ def model_train(
             if current_miou_score > best_iou_score:
                 best_iou_score = current_miou_score
                 torch.save(model.state_dict(), CURRENT_MODEL_PATH)
+                bad_epochs = 0
                 # save the best model
             else:
                 bad_epochs += 1
@@ -108,12 +105,12 @@ def model_train(
             assert loss is not None
             prog.update(
                 train_bar,
-                description=f"Epoch {epoch}, IOU: {current_miou_score:.2f}, PA: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
+                description=f"Epoch {epoch}, IOU: {current_miou_score:.2f}, Acc: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
             )
             prog.update(
                 epoch_bar,
                 advance=1,
-                description=f"All Epochs, IOU: {current_miou_score:.2f}",
+                description=f"All Epochs, IOU: {current_miou_score:.2f}, Patience: {bad_epochs}",
             )
 
 
