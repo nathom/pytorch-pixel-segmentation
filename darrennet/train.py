@@ -1,8 +1,6 @@
 import numpy as np
 import torch
-
 from rich.console import Console
-
 from rich.progress import (
     BarColumn,
     Progress,
@@ -84,9 +82,8 @@ def model_train(
                 prog.update(
                     train_bar,
                     advance=1,
-                    description=f"Epoch {epoch}, IOU: n/a, PA: n/a, Loss: {loss.item():.2f}",
+                    description=f"Epoch {epoch}, IOU: n/a, Acc: n/a, Loss: {loss.item():.2f}",
                 )
-
 
             current_miou_score, pixel_acc, loss = evaluate_validation(
                 model, criterion, epoch, validation_loader, device
@@ -106,7 +103,7 @@ def model_train(
             assert loss is not None
             prog.update(
                 train_bar,
-                description=f"Epoch {epoch}, IOU: {current_miou_score:.2f}, PA: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
+                description=f"Epoch {epoch}, IOU: {current_miou_score:.2f}, Acc: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
             )
             prog.update(
                 epoch_bar,

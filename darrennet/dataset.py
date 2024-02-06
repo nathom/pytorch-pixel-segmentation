@@ -21,15 +21,15 @@ def download_data():
     )
 
 
-def load_dataset(input_transform, target_transform):
+def load_dataset(augment_transform, input_transform, target_transform):
     train_dataset = voc.VOC(
-        "train", transform=input_transform, target_transform=target_transform
+        "train", input_transform, target_transform, augmentation=augment_transform
     )
     val_dataset = voc.VOC(
-        "val", transform=input_transform, target_transform=target_transform
+        "val", input_transform, target_transform, augmentation=augment_transform
     )
     test_dataset = voc.VOC(
-        "test", transform=input_transform, target_transform=target_transform
+        "test", input_transform, target_transform, augmentation=augment_transform
     )
 
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
