@@ -61,7 +61,7 @@ def model_train(
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
-            train_bar = prog.add_task(f"Epoch {epoch}", total=len(train_loader))
+            train_bar = prog.add_task(f"Epoch {epoch}.", total=len(train_loader))
             loss = None
             for inputs, labels in train_loader:
                 optimizer.zero_grad()
@@ -92,6 +92,7 @@ def model_train(
             if current_miou_score > best_iou_score:
                 best_iou_score = current_miou_score
                 torch.save(model.state_dict(), CURRENT_MODEL_PATH)
+                bad_epochs = 0
                 # save the best model
             else:
                 bad_epochs += 1
@@ -108,7 +109,7 @@ def model_train(
             prog.update(
                 epoch_bar,
                 advance=1,
-                description=f"All Epochs, IOU: {current_miou_score:.2f}",
+                description=f"All Epochs, IOU: {current_miou_score:.2f}, Patience: {bad_epochs}",
             )
 
 

@@ -161,8 +161,8 @@ class VOC(data.Dataset):
 
     def __getitem__(self, index: int):
         img_path, mask_path = self.imgs[index]
-        img = Image.open(img_path).convert("RGB")
-        mask = Image.open(mask_path)
+        img = Image.open(img_path).convert("RGB").resize((224, 224))
+        mask = Image.open(mask_path).resize((224, 224))
 
         if self.mode == "train" and self.augmentation is not None:
             img, mask = self.augmentation(img, mask)
