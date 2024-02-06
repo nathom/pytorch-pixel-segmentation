@@ -47,7 +47,7 @@ def model_train(
 
     best_iou_score = 0.0
     bad_epochs = 0
-    patience = 3
+    patience = 6
 
     progress = Progress(
         TextColumn("[cyan]{task.description}"),
@@ -64,12 +64,11 @@ def model_train(
             train_bar = prog.add_task(f"Epoch {epoch}.", total=len(train_loader))
             loss = None
             for inputs, labels in train_loader:
-                optimizer.zero_grad()
-
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 outputs = model(inputs)
 
+                optimizer.zero_grad()
                 # Compute loss
                 loss = criterion(outputs, labels)
 
