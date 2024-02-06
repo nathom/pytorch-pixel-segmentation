@@ -59,8 +59,9 @@ def info():
 @click.option("-w", "--weight", help="Weight loss by inverse frequency.", is_flag=True)
 @click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
 @click.option("-e", "--erfnet", help="Use ERFNet", is_flag=True)
+@click.option("-s", "--save", help="Saves model to directory with specified name.")
 @main.command(cls=HelpColorsCommand)
-def cook(weight, augment, erfnet):
+def cook(weight, augment, erfnet, save):
     """Train the model."""
     epochs = 150
     n_class = 21
