@@ -174,3 +174,4 @@ writeup/*
 !writeup/images/*.png
 !writeup/images/*.jpg
 !writeup/images/*.jpeg
+models/
