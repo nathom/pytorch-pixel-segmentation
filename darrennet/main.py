@@ -1,8 +1,8 @@
+import os
+
 import click
 import numpy as np
 import torch
-import os
-import torchvision.transforms as standard_transforms
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 from rich.traceback import install
 from torch import nn
@@ -13,6 +13,7 @@ from .basic_fcn import FCN
 from .dataset import download_data, get_frequency_spectrum, load_dataset
 from .erfnet import ERF
 from .train import model_test, model_train
+from .unet import UNet
 from .util import find_device
 
 models_dir = "./models"
@@ -51,6 +52,7 @@ def download():
     theme.print("Downloading dataset...")
     download_data()
 
+
 @main.command(cls=HelpColorsCommand)
 def info():
     get_frequency_spectrum()
@@ -59,18 +61,23 @@ def info():
 @click.option("-w", "--weight", help="Weight loss by inverse frequency.", is_flag=True)
 @click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
 @click.option("-e", "--erfnet", help="Use ERFNet", is_flag=True)
+@click.option("-u", "--unet", help="Use UNet", is_flag=True)
 @click.option("-s", "--save", help="Saves model to directory with specified name.")
 @main.command(cls=HelpColorsCommand)
-def cook(weight, augment, erfnet, save):
+def cook(weight, augment, erfnet, save, unet):
     """Train the model."""
     epochs = 150
     n_class = 21
     device = find_device()
-    
+
     if erfnet:
         theme.print("Using ERFNet")
         fcn_model = ERF(num_classes=n_class, input_channels=3)
         learning_rate = 5e-4
+    elif unet:
+        theme.print("using UNet")
+        fcn_model = UNet(3, n_class)
+        learning_rate = 0.001
     else:
         theme.print("Using FCN")
         fcn_model = FCN(n_class=n_class)
@@ -129,7 +136,7 @@ def cook(weight, augment, erfnet, save):
         params=fcn_model.parameters(), lr=learning_rate, weight_decay=1e-4
     )
     criterion = torch.nn.CrossEntropyLoss(weight=weights)
-    
+
     cos_opt = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
 
     fcn_model = fcn_model.to(device)
@@ -161,7 +168,14 @@ def cook(weight, augment, erfnet, save):
 
     theme.print("Training network...")
     model_train(
-        fcn_model, optimizer, criterion, device, train_loader, val_loader, epochs, cos_opt
+        fcn_model,
+        optimizer,
+        criterion,
+        device,
+        train_loader,
+        val_loader,
+        epochs,
+        cos_opt,
     )
     if save:
         path = os.path.join(models_dir, save + ".pkl")
@@ -179,11 +193,10 @@ def insight(load):
     theme.print("Loading network and running inference...")
     device = find_device()
     criterion = torch.nn.CrossEntropyLoss()
-    _, _, test_loader = load_dataset(
-        input_transform, MaskToTensor()
-    )
+    _, _, test_loader = load_dataset(None, input_transform, MaskToTensor())
 
     model_test(model, criterion, test_loader, device)
+
 
 if __name__ == "__main__":
     main()
