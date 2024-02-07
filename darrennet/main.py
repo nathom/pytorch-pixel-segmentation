@@ -77,7 +77,7 @@ def cook(weight, augment, erfnet, save, unet):
     elif unet:
         theme.print("using UNet")
         fcn_model = UNet(3, n_class)
-        learning_rate = 0.001
+        learning_rate = 1e-3
     else:
         theme.print("Using FCN")
         fcn_model = FCN(n_class=n_class)
@@ -135,6 +135,7 @@ def cook(weight, augment, erfnet, save, unet):
     optimizer = torch.optim.Adam(
         params=fcn_model.parameters(), lr=learning_rate, weight_decay=1e-4
     )
+    theme.print(f"Learning rate: {learning_rate}, weight decay: {1e-4}")
     criterion = torch.nn.CrossEntropyLoss(weight=weights)
 
     cos_opt = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
@@ -177,7 +178,16 @@ def cook(weight, augment, erfnet, save, unet):
         epochs,
         cos_opt,
     )
-    if save:
+
+    theme.print("Testing network...")
+    model_test(
+        fcn_model,
+        criterion,
+        test_loader,
+        device,
+    )
+
+    if save is not None:
         path = os.path.join(models_dir, save + ".pkl")
         print(f"Saving model to {path}")
         torch.save(fcn_model, path)
@@ -193,6 +203,16 @@ def insight(load):
     theme.print("Loading network and running inference...")
     device = find_device()
     criterion = torch.nn.CrossEntropyLoss()
+    mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    input_transform = v2.Compose(
+        [
+            v2.ToImage(),
+            # v2.Resize((224, 224)),
+            v2.ToDtype(torch.float32, scale=True),
+            v2.Normalize(*mean_std),
+        ]
+    )
+
     _, _, test_loader = load_dataset(None, input_transform, MaskToTensor())
 
     model_test(model, criterion, test_loader, device)
