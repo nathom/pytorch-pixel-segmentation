@@ -1,11 +1,13 @@
-import os
-
+import torch
 from PIL import Image
 from torch.utils import data
+from torchvision.transforms import v2
+
+from .paths import DATA_DIR
 
 num_classes = 21
 ignore_label = 255
-root = "./data"
+root = DATA_DIR
 
 """
 color map
@@ -103,34 +105,21 @@ def make_dataset(mode):
     """
     assert mode in ["train", "val", "test"]
     items = []
+    voc_2007 = root / "VOCdevkit" / "VOC2007"
+    img_dir = voc_2007 / "JPEGImages"
+    mask_path = voc_2007 / "SegmentationClass"
     if mode == "train":
-        img_path = os.path.join(root, "VOCdevkit", "VOC2007", "JPEGImages")
-        mask_path = os.path.join(root, "VOCdevkit", "VOC2007", "SegmentationClass")
-        data_list = [
-            l.strip("\n")
-            for l in open(
-                os.path.join(
-                    root,
-                    "VOCdevkit",
-                    "VOC2007",
-                    "ImageSets",
-                    "Segmentation",
-                    "train.txt",
-                )
-            ).readlines()
-        ]
-        for it in data_list:
-            item = (
-                os.path.join(img_path, it + ".jpg"),
-                os.path.join(mask_path, it + ".png"),
-            )
-            items.append(item)
+        img_names = voc_2007 / "ImageSets" / "Segmentation" / "train.txt"
     elif mode == "val":
-        # TODO
-        pass
+        img_names = voc_2007 / "ImageSets" / "Segmentation" / "val.txt"
     else:
-        # TODO FOR TEST SET
-        pass
+        img_names = voc_2007 / "ImageSets" / "Segmentation" / "test.txt"
+
+    with open(img_names) as file:
+        items = [
+            (img_dir / f"{img}.jpg", mask_path / f"{img}.png")
+            for img in map(str.strip, file.readlines())
+        ]
 
     return items
 
@@ -153,25 +142,36 @@ class VOC(data.Dataset):
         target_transform (callable, optional): Transform to be applied to the masks.
     """
 
-    def __init__(self, mode, transform=None, target_transform=None):
+    def __init__(
+        self,
+        mode: str,
+        transform: v2.Transform | None = None,
+        target_transform: v2.Transform | None = None,
+        augmentation: v2.Transform | None = None,
+    ):
         self.imgs = make_dataset(mode)
         if len(self.imgs) == 0:
             raise RuntimeError("Found 0 images, please check the data set")
         self.mode = mode
+        self.augmentation = augmentation
         self.transform = transform
         self.target_transform = target_transform
         self.width = 224
         self.height = 224
 
-    def __getitem__(self, index):
+    def __getitem__(self, index: int):
         img_path, mask_path = self.imgs[index]
-        img = Image.open(img_path).convert("RGB").resize((self.width, self.height))
-        mask = Image.open(mask_path).resize((self.width, self.height))
+        img = Image.open(img_path).convert("RGB").resize((224, 224))
+        mask = Image.open(mask_path).resize((224, 224))
+
+        if self.mode == "train" and self.augmentation is not None:
+            img, mask = self.augmentation(img, mask)
 
         if self.transform is not None:
             img = self.transform(img)
+
         if self.target_transform is not None:
-            mask = self.target_transform(mask)
+            mask: torch.Tensor = self.target_transform(mask)
 
         mask[mask == ignore_label] = 0
 

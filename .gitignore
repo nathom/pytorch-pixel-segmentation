@@ -174,3 +174,7 @@ writeup/*
 !writeup/images/*.png
 !writeup/images/*.jpg
 !writeup/images/*.jpeg
+models/
+
+# Ignore file that trains with cuda
+cuda.py
