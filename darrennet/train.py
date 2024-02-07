@@ -78,7 +78,6 @@ def model_train(
 
                 # Update weights
                 optimizer.step()
-                cos_opt.step()
 
                 prog.update(
                     train_bar,
@@ -86,6 +85,7 @@ def model_train(
                     description=f"Epoch {epoch}, IOU: n/a, Acc: n/a, Loss: {loss.item():.2f}",
                 )
 
+            cos_opt.step()
             current_miou_score, pixel_acc, loss = evaluate_validation(
                 model, criterion, epoch, validation_loader, device
             )
@@ -235,7 +235,7 @@ def export_model(fcn_model, device, inputs):
     # TODO Then Load your best model using saved_model_path
     try:
         checkpoint = torch.load(path, map_location=device)
-        fcn_model.load_state_dict(checkpoint['model_state_dict'])
+        fcn_model.load_state_dict(checkpoint["model_state_dict"])
         print("Best model loaded successfully.")
     except FileNotFoundError:
         print(f"Error: Model checkpoint not found at {path}. Please check the path.")
@@ -251,6 +251,6 @@ def export_model(fcn_model, device, inputs):
         output_image = fcn_model(inputs)
 
     # TURNING THE TRAIN MODE BACK ON TO ENABLE BATCHNORM/DROPOUT!!
-    fcn_model.train()  
+    fcn_model.train()
 
     return output_image
