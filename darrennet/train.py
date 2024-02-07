@@ -59,6 +59,7 @@ def model_train(
         TimeElapsedColumn(),
         console=console,
     )
+
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
@@ -72,10 +73,8 @@ def model_train(
                 optimizer.zero_grad()
                 # Compute loss
                 loss = criterion(outputs, labels)
-
                 # Backpropagate
                 loss.backward()
-
                 # Update weights
                 optimizer.step()
 
