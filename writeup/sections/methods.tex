@@ -1,12 +1,21 @@
 \section*{Methods}
+% In the Methods section, you should describe the implementation and architectural details of your system - in particular, this addresses how you approached the problem and the design of your solution. For those who believe in reproducible science, this should be fine-grained enough such that somebody could implement your model/algorithm and reproduce the results you claim to achieve.
 
 \subsection*{Baseline}
+(a) Baseline (5 pt): You should describe the baseline architecture, stating the appropriate activation function on the last layer of the network, the loss criterion, weights initialization scheme and the gradient descent optimizer you used.
+
+Our baseline architecture consists of an encoder, decoder, classifier, and activation.
+\begin{itemize}
+	\item[] \textbf{Encoder} \\
+		We have five convolutional layers that increases the depth of the orginal 3 channels to 32 to 64 to 128 to 256 to 512 each using a size 3 kernel, padding of 1, a stride of 2, and no dilation. Each layer sees a small decrease in the height and width of the layer according to the expression $\frac{W - F + 2P}{2} + 1$. The outputs of each convolutional layer are subsequently passed through a ReLU activation function and a batch normalization layer.
+	\item[] \textbf{Decoder} \\
+		We have five deconvolutional, or upsampling layers that decreases the depth of the final 512 deep layer output from the encoder. This is decreases from 512 to 256 to 128 to 64 to 32 each using a size 3 kernel, padding of 1, a stride of 2, and no dilation. Each layer sees a small decrease in the height and width of the layer according to the expression $S(W - 1) + F - 2P$. Similarly, the outputs of each deconvolutional layer are subsequently passed through a ReLU activation function and a batch normalization layer.
+	\item[] \textbf{Classifier and Activation} \\
+		In our final layer, we have a $1 \times 1$ convolutional kernel
+\end{itemize}
 
 \subsection*{Improvements Over Baseline}
-
+(b) Improvements over Baseline (5 pt): You should describe the approaches you took to improve over the baseline model.
 \subsection*{Experimentation}
 
-In the Methods section, you should describe the implementation and architectural details of your system - in particular, this addresses how you approached the problem and the design of your solution. For those who believe in reproducible science, this should be fine-grained enough such that somebody could implement your model/algorithm and reproduce the results you claim to achieve.
-(a) Baseline (5 pt): You should describe the baseline architecture, stating the appropriate activation function on the last layer of the network, the loss criterion, weights initialization scheme and the gradient descent optimizer you used.
-(b) Improvements over Baseline (5 pt): You should describe the approaches you took to improve over the baseline model.
 (c) Experimentation (10 pt): Describe your two experimental CNN architectures(parts 5.a and 5.b) and the U-Net, each in a table, which the first column indicate the particular layer of your network, and the other columns state the layer’s dimensions (e.g. in-channels, out-channels, kernel-size, padding/stride) and activation function/non-linearity. Describe any regularization techniques (e.g. data augmentation) you used, parameter initializa- tion methods, gradient descent optimization, and how you addressed the class-imbalance problem .
