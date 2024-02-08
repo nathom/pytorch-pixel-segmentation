@@ -1,15 +1,15 @@
 \section*{Related Works}
 
-\subsection*{U-Net} 
+\subsection*{U-Net}
 U-Net \cite{unet} has proven to be highly effective for biomedical image segmentation tasks. Its architecture features a contracting path to capture context and an expansive path for precise localization. The innovative use of skip connections facilitates the flow of fine-grained details across different layers, enhancing the model's ability to accurately delineate object boundaries.
 
-% \subsection*{ERFNet} 
-% ERFNet \cite{erfnet} introduces a novel factorized convolutional layer that significantly reduces the number of parameters while maintaining expressive power. This reduction in parameters enables faster inference without compromising performance, making it well-suited for deployment in resource-constrained environments.
+\subsection*{ERFNet}
+ERFNet \cite{erfnet} introduces a novel factorized convolutional layer that significantly reduces the number of parameters while maintaining expressive power. This reduction in parameters enables faster inference without compromising performance, making it well-suited for deployment in resource-constrained environments.
 
-\subsection*{ResNet} 
+\subsection*{ResNet}
 ResNet \cite{resnet} addresses the challenges of training very deep neural networks by employing residual connections. These connections enable the direct flow of information across layers, mitigating the vanishing gradient problem and facilitating the training of extremely deep networks.
 
-\subsection*{Relevance to our model} 
+\subsection*{Relevance to our model}
 We test the performance of the above models on the image segmentation task using the PASCAL VOC-2007 dataset. We look for differences in the models and their relative performance in comparison to the basic fully connected network that we started with.
 
 % The U-Net-inspired design prioritizes spatial precision and context awareness, crucial for tasks such as image segmentation, while the ResNet-inspired residual connections promote efficient training and enable the effective propagation of information through deep networks. (To add if we actually create a custom model)

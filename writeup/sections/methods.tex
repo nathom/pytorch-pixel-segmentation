@@ -51,19 +51,102 @@ To mitigate the challenges posed by class imbalance, particularly addressing rar
 	\caption{DarrenNet Architecture}
 \end{table}
 
+\begin{table}[ht]
+	\setlength{\abovecaptionskip}{10pt}
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer Name} & \textbf{In}          & \textbf{Out}         & \textbf{Padding}      & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
+		\hline
+		conv3x1\_1          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1, 0)                & (3, 1)               & 1               & ReLU                \\
+		\hline
+		conv1x3\_1          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1)                & (1, 3)               & 1               & ReLU                \\
+		\hline
+		conv3x1\_2          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1$\times$dilated, 0) & (3, 1)               & 1               & ReLU                \\
+		\hline
+		conv1x3\_2          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1$\times$dilated) & (1, 3)               & 1               & ReLU                \\
+		\hline
+		bn1                 &                      &                      &                       &                      &                 &                     \\
+		\hline
+		bn2                 &                      &                      &                       &                      &                 &                     \\
+		\hline
+		relu                &                      &                      &                       &                      &                 & Inplace             \\
+		\hline
+		dropout             &                      &                      &                       &                      &                 & 2D                  \\
+		\hline
+	\end{tabular}
+	\caption{Non-bottleneck}
+\end{table}
+
+\begin{table}[htbp]
+	\setlength{\abovecaptionskip}{10pt}
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}                                 & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
+		\hline
+		conv                & $in_{\text{channel}}$  & $out_{\text{channel}} - in_{\text{channel}}$ & (1, 1)           & (3, 3)               & 2               & -                   \\
+		\hline
+		pool                & -                      & -                                            & -                & (2, 2)               & 2               & -                   \\
+		\hline
+		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$                       & -                & -                    & -               & -                   \\
+		\hline
+		relu                & -                      & -                                            & -                & -                    & -               & Inplace             \\
+		\hline
+	\end{tabular}
+	\caption{DownsamplerBlock}
+\end{table}
+
+\begin{table}[htbp]
+	\setlength{\abovecaptionskip}{10pt}
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}           & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
+		\hline
+		conv                & $in_{\text{channel}}$  & $out_{\text{channel}}$ & (1, 1)           & (3, 3)               & 2               & -                   \\
+		\hline
+		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$ & -                & -                    & -               & -                   \\
+		\hline
+		relu                & -                      & -                      & -                & -                    & -               & Inplace             \\
+		\hline
+	\end{tabular}
+	\caption{UpsamplerBlock}
+\end{table}
+
 \subsection*{DarrenYuNet}
 \begin{table}[htbp]
 	\centering
-	\label{tab:darren}
+	\label{tab:darrenyu}
 	\setlength{\abovecaptionskip}{10pt}
 	\begin{tabular}{|c|c|c|c|c|c|c|}
 		\hline
-		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
-		Layer 1        & -           & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
-		Layer 2        & 64          & 128          & 1                & 3x3             & 2               & ReLU                \\ \hline
-		Layer 3        & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		\textbf{Layer}    & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
+		Initial Block     &             & 16           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Downsampler 1     & 16          & 64           & 0                & 3x3             & 2               & ReLU                \\ \hline
+		Non-bottleneck 1  & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 2  & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 3  & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 4  & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 5  & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Downsampler 2     & 64          & 128          & 0                & 3x3             & 2               & ReLU                \\ \hline
+		Non-bottleneck 6  & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 7  & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 8  & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 9  & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 10 & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 11 & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 12 & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 13 & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Upsampler 1       & 128         & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 14 & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 15 & 64          & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Upsampler 2       & 64          & 16           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 16 & 16          & 16           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Non-bottleneck 17 & 16          & 16           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Output Conv       & 16          & 21           & 0                & 2x2             & 2               & -                   \\ \hline
 	\end{tabular}
-	\caption{DarrenYuNet (Transfer Learning) Architecture}
+	\caption{DarrenUNet Architecture}
 \end{table}
 
 \subsection*{UNet}
@@ -102,6 +185,6 @@ To mitigate the challenges posed by class imbalance, particularly addressing rar
 		conv18         & 64          & 64           & 1                & 3x3             & 1               & ReLU                \\ \hline
 		output         & 64          & 21           & 0                & 1x1             & 1               & ReLU                \\ \hline
 	\end{tabular}
-	\caption{U-Net Architecture}
+	\caption{UNet Architecture}
 \end{table}
 
