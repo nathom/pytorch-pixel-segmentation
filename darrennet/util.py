@@ -1,8 +1,12 @@
 import matplotlib.pyplot as plt
 import numpy as np
 import torch
+import os
+import warnings
 import torchvision.transforms.functional as F
 from torchmetrics import JaccardIndex
+from torchvision.transforms import v2
+from .main import load_dataset
 
 from . import theme
 
@@ -102,3 +106,104 @@ def display_images(image_tensors, mask_tensors):
 
     plt.tight_layout()
     plt.show()
+
+def makeImagesPlotReady(image):
+    batch, depth, height, width = image.shape
+    reshape_img = image[0]
+
+    # Get the rgb channels and reshape the image to height x width x depth
+    r, g, b = reshape_img
+    reshape_img = np.array([[[r[i][j], g[i][j], b[i][j]] for j in range(width)] for i in range(height)])
+    return reshape_img
+
+def convertMaskToRGB(msk, palette):
+    b, d, h, w = msk.shape
+    mask_rgb = np.zeros((1, 3, h, w), dtype=np.uint8)
+
+    # Loop through every pixel of the mask and set the corresponding RGB values
+    for i in range(h):
+        for j in range(w):
+            mask_rgb[0][0][i][j], mask_rgb[0][1][i][j], mask_rgb[0][2][i][j] = palette[int(msk[0][0][i][j])]
+    return mask_rgb
+
+def returnToString(arr, noToClass):
+    string = ""
+    for i in arr:
+        string += noToClass[i]
+        string += ", "
+    return string[:-2]
+
+def export_model(fcn_model, device, inputs):
+    fcn_model.eval()
+    fcn_model.to(device)
+    inputs = inputs.to(device)
+    with torch.no_grad():
+        output_image = fcn_model(inputs)
+    fcn_model.train()
+    return output_image
+
+def compare_images(model_paths, img_idx=0, img_cnt=1):
+    num_to_class = {0:"background", 1:"aeroplane", 2:"bicycle", 3:"bird", 4:"boat", 5:"bottle",
+                 6:"bus", 7:"car", 8:"cat", 9:"chair", 10:"cow", 11:"dining table", 12:"dog",
+                 13:"horse", 14:"motorbike", 15:"person", 16:"potted plant", 17:"sheep",
+                 18:"sofa", 19:"train", 20:"tv/monitor"}
+
+    rgb = [(0, 0, 0), (128, 0, 0), (0, 128, 0), (128, 128, 0), (0, 0, 128), (128, 0, 128), (0, 128, 128)
+           ,(128, 128, 128), (64, 0, 0), (192, 0, 0), (64, 128, 0), (192, 128, 0), (64, 0, 128), (192, 0, 128)
+           ,(64, 128, 128), (192, 128, 128), (0, 64, 0), (128, 64, 0), (0, 192, 0), (128, 192, 0), (0, 64, 128)]
+
+    rgb = {i : rgb[i] for i in range(len(num_to_class))}
+
+    mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    input_transform = v2.Compose(
+        [
+            v2.ToImage(),
+            v2.Resize((224, 224)),
+            v2.ToDtype(torch.float32, scale=True),
+            v2.Normalize(*mean_std),
+        ]
+    )
+    mask_transform = v2.Compose(
+        [
+            v2.Lambda(lambda x: x.resize((224, 224))),
+            v2.ToImage(),
+        ]
+    )
+
+    train, val, test = load_dataset(None, input_transform, mask_transform, size=1)
+    if img_idx < 0 or img_idx > len(test) - 1: img_idx = 0
+
+    first_batch = iter(test)
+    for _ in range(img_idx): next(first_batch)
+
+    # Create models here
+    models = [torch.load(os.path.join("models/" + m)) for m in model_paths]
+    model_cnt = len(models) + 1
+    device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
+
+    model_paths.insert(0, "Ground Truth")
+    for _ in range(img_cnt):
+        img, msk = next(first_batch)
+        true_classes = [num_to_class[i] for i in torch.unique(msk).numpy()]
+        print("Ground True Classes:", true_classes,"\n")
+
+        output_images = [convertMaskToRGB(msk, rgb)]
+        for i in range(model_cnt - 1):
+            output_image = export_model(models[i], device, img)
+
+            output_image = output_image.to("cpu").detach()
+            output_image = torch.argmax(output_image, dim=1)
+            print(f"Model \"{model_paths[i + 1]}\" Predicted Classes:", returnToString(torch.unique(output_image).numpy(), num_to_class))
+
+            output_image = output_image[None,:,:,:]
+            mask_rgb = convertMaskToRGB(output_image, rgb)
+            output_images.append(mask_rgb)
+
+        fig, axs = plt.subplots(model_cnt // 4 + 1, 4, figsize=(12, 6))
+        axs = axs.flatten()
+        for c in range(model_cnt):
+            axs[c].imshow(makeImagesPlotReady(img))
+            axs[c].imshow(makeImagesPlotReady(output_images[c]), alpha = 0.6)
+            axs[c].set_title(model_paths[c])
+            axs[c].axis('off')
+        plt.show()

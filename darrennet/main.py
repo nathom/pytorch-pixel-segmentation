@@ -2,6 +2,7 @@ import json
 import os
 
 import click
+import matplotlib.pyplot as plt
 import numpy as np
 import segmentation_models_pytorch as smp
 import torch
@@ -19,7 +20,7 @@ from .erfnet_imagenet import ERFNet
 from .train import model_test, model_train
 from .unet import UNet
 from .unet_resnet import UNetResnet
-from .util import display_images, find_device
+from .util import compare_images, display_images, find_device
 
 models_dir = "./models"
 os.makedirs(models_dir, exist_ok=True)
@@ -301,6 +302,14 @@ def cook(
             patience,
         )
 
+        plt.plot(training_losses)
+        plt.plot(validation_losses)
+        plt.title("Train and Valid Set Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.legend()
+        plt.show()
+
         theme.print("Testing network...")
         model_test(
             fcn_model,
@@ -340,8 +349,17 @@ def cook(
 @click.option("-l", "--load", help="Loads cached model.")
 @click.option("-d", "--display", is_flag=True)
 @click.option("-i", "--img", type=str)
+@click.option("-c", "--compare")
 @main.command(cls=HelpColorsCommand)
-def insight(load, display, img):
+def insight(load, display, compare, img):
+    if compare:
+        files = []
+        for file in os.listdir(os.getcwd() + "/models"):
+            if file.endswith(".pkl"):
+                files.append(file)
+        compare_images(files, int(compare), 1)
+        return
+
     """Run inference on the model."""
     path = os.path.join(models_dir, load + ".pkl")
     model = torch.load(path)
