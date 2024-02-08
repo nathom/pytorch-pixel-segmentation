@@ -6,6 +6,7 @@ import numpy as np
 import segmentation_models_pytorch as smp
 import torch
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
+from PIL import Image
 from rich.traceback import install
 from torch import nn
 from torchvision.transforms import v2
@@ -94,8 +95,19 @@ def validate_filepath(ctx, param, value):
     return value
 
 
+def validate_filepath_exists(ctx, param, value):
+    if value is None:
+        return value
+    path1 = os.path.join(models_dir, value + ".pkl")
+    path2 = os.path.join(models_dir, value + ".json")
+    if value and not (os.path.exists(path1) and os.path.exists(path2)):
+        raise click.BadParameter(f"Item '{value}' must exist.")
+    return value
+
+
 @click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
 @click.option("-e", "--erfnet", help="Use ERFNet", is_flag=True)
+@click.option("-ep", "--erfnet-pretrained", help="Use ERFNet pretrained", is_flag=True)
 @click.option("-u", "--unet", help="Use UNet", is_flag=True)
 @click.option(
     "-smp",
@@ -121,11 +133,19 @@ def validate_filepath(ctx, param, value):
     help="Saves model to directory with specified name.",
     callback=validate_filepath,
 )
+@click.option(
+    "-l",
+    "--load",
+    help="Load model and train it",
+    callback=validate_filepath_exists,
+)
 @click.option("--epochs", type=int, default=150, help="Number of epochs")
 @click.option("--patience", type=int, default=70, help="Number of max bad epochs")
 @main.command(cls=HelpColorsCommand)
 def cook(
+    load,
     augment,
+    erfnet_pretrained,
     erfnet,
     save,
     unet,
@@ -140,7 +160,11 @@ def cook(
     n_class = 21
     device = find_device()
 
-    if erfnet:
+    if load:
+        path = os.path.join(models_dir, load + ".pkl")
+        fcn_model = torch.load(path)
+        learning_rate = 1e-3
+    elif erfnet_pretrained:
         theme.print("Using ERFNet")
         pretrained_enc = ERFNet(1000)
         pretrained_model_path = "./data/erfnet_encoder_pretrained.pth.tar"
@@ -155,6 +179,9 @@ def cook(
         pretrained_enc = next(pretrained_enc.children()).encoder
 
         fcn_model = ERF(num_classes=n_class, input_channels=3, encoder=pretrained_enc)
+        learning_rate = 5e-4
+    elif erfnet:
+        fcn_model = ERF(num_classes=n_class, input_channels=3)
         learning_rate = 5e-4
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
@@ -293,7 +320,7 @@ def cook(
                     {
                         "learning_rate": learning_rate,
                         "augment": augment,
-                        "erfnet": erfnet,
+                        "erfnet": erfnet_pretrained,
                         "save": save,
                         "unet": unet,
                         "unet_resnet": unet_resnet,
@@ -312,8 +339,9 @@ def cook(
 
 @click.option("-l", "--load", help="Loads cached model.")
 @click.option("-d", "--display", is_flag=True)
+@click.option("-i", "--img", type=str)
 @main.command(cls=HelpColorsCommand)
-def insight(load, display):
+def insight(load, display, img):
     """Run inference on the model."""
     path = os.path.join(models_dir, load + ".pkl")
     model = torch.load(path)
@@ -339,7 +367,18 @@ def insight(load, display):
     model_test(model, criterion, test_loader, device)
 
     if display:
+        if img is not None:
+            img_obj = Image.open(img).convert("RGB").resize((224, 224))
+            inputs = input_transform(img_obj)
+            inputs = inputs.unsqueeze(0)
+            print(inputs.shape)
+            inputs2 = inverse_normalize(inputs)
+            outputs = model(inputs.to(device)).cpu().detach().numpy()
+            outputs = np.argmax(outputs, axis=1).astype(np.uint8)
+            display_images(inputs2.cpu(), outputs)
+
         for inputs, labels in test_loader:
+            print(inputs.shape)
             labels = v2.ToDtype(torch.uint8)(labels)
             inputs2 = inverse_normalize(inputs)
             outputs = model(inputs.to(device)).cpu().detach().numpy()

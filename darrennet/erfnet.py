@@ -192,6 +192,8 @@ class ERF(nn.Module):
             bias=True,
         )
 
+        # self.activation = nn.Softmax(dim=1)
+
         # self.apply(weights_init_normal)
 
     def forward(self, x):
@@ -207,5 +209,6 @@ class ERF(nn.Module):
             output = layer(output)
 
         output = self.output_conv(output)
+        # output = self.activation(output)
 
         return output
