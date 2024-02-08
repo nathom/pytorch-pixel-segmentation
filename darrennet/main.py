@@ -14,6 +14,7 @@ from . import theme
 from .basic_fcn import FCN
 from .dataset import download_data, get_frequency_spectrum, load_dataset
 from .erfnet import ERF
+from .erfnet_imagenet import ERFNet
 from .train import model_test, model_train
 from .unet import UNet
 from .unet_resnet import UNetResnet
@@ -121,37 +122,42 @@ def validate_filepath(ctx, param, value):
     callback=validate_filepath,
 )
 @click.option("--epochs", type=int, default=150, help="Number of epochs")
+@click.option("--patience", type=int, default=70, help="Number of max bad epochs")
 @main.command(cls=HelpColorsCommand)
-def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs, dice):
+def cook(
+    augment,
+    erfnet,
+    save,
+    unet,
+    unet_resnet,
+    smp_module,
+    no_cosine,
+    epochs,
+    dice,
+    patience,
+):
     """Train the model."""
     n_class = 21
     device = find_device()
 
     if erfnet:
         theme.print("Using ERFNet")
-        fcn_model = ERF(num_classes=n_class, input_channels=3)
+        pretrained_enc = ERFNet(1000)
+        pretrained_model_path = "./data/erfnet_encoder_pretrained.pth.tar"
+        state_dict = torch.load(pretrained_model_path, map_location=device)[
+            "state_dict"
+        ]
+        new_state_dict = {}
+        for k, v in state_dict.items():
+            nk = k.replace("module.", "")
+            new_state_dict[nk] = v
+        pretrained_enc.load_state_dict(new_state_dict)
+        pretrained_enc = next(pretrained_enc.children()).encoder
+
+        fcn_model = ERF(num_classes=n_class, input_channels=3, encoder=pretrained_enc)
         learning_rate = 5e-4
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
-        fcn_model = smp.create_model("unetplusplus", classes=21)
-        learning_rate = 1e-3
-    elif smp_module == "unet":
-        theme.print("Using smp unet")
-        # aux_params = dict(
-        #     pooling="max",  # one of 'avg', 'max'
-        #     dropout=0.5,  # dropout ratio, default is None
-        #     # activation="sigmoid",  # activation function, default is None
-        #     classes=21,  # define number of output labels
-        # )
-        fcn_model = smp.create_model("unet", classes=21, aux_params=None)
-        learning_rate = 1e-3
-    elif smp_module == "manet":
-        theme.print("Using smp manet")
-        fcn_model = smp.create_model("manet", classes=21)
-        learning_rate = 1e-3
-    elif smp_module == "fpn":
-        theme.print("Using smp FPN")
-        fcn_model = smp.create_model("unetplusplus", classes=21)
         learning_rate = 1e-3
     elif smp_module == "linknet":
         theme.print("Using smp LinkNet")
@@ -265,6 +271,7 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
             val_loader,
             epochs,
             cos_opt,
+            patience,
         )
 
         theme.print("Testing network...")

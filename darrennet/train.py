@@ -30,6 +30,7 @@ def model_train(
     validation_loader,
     epochs: int,
     cos_opt,
+    patience: int,
 ):
     """
     Train a deep learning model using mini-batches.
@@ -48,7 +49,6 @@ def model_train(
 
     best_loss = float("inf")
     bad_epochs = 0
-    patience = 40
 
     progress = Progress(
         TextColumn("[cyan]{task.description}"),
@@ -125,7 +125,7 @@ def model_train(
             prog.update(
                 epoch_bar,
                 advance=1,
-                description=f"All Epochs, IOU: {current_miou_score:.2f}, Patience: {bad_epochs}",
+                description=f"All Epochs, IOU: {current_miou_score:.2e}, Patience: {bad_epochs}",
             )
 
         return losses, training_losses, ious, accs
