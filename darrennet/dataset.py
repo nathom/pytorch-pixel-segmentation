@@ -27,12 +27,8 @@ def load_dataset(augment_transform, input_transform, target_transform):
     train_dataset = voc.VOC(
         "train", input_transform, target_transform, augmentation=augment_transform
     )
-    val_dataset = voc.VOC(
-        "val", input_transform, target_transform, augmentation=augment_transform
-    )
-    test_dataset = voc.VOC(
-        "test", input_transform, target_transform, augmentation=augment_transform
-    )
+    val_dataset = voc.VOC("val", input_transform, target_transform, augmentation=None)
+    test_dataset = voc.VOC("test", input_transform, target_transform, augmentation=None)
 
     train_loader = DataLoader(dataset=train_dataset, batch_size=16, shuffle=True)
     val_loader = DataLoader(dataset=val_dataset, batch_size=16, shuffle=False)

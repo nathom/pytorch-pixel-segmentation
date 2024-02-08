@@ -13,6 +13,8 @@ click = "^8.1.7"
 click-help-colors = "^0.9.4"
 rich = "^13.7.0"
 torchmetrics = "^1.3.0.post0"
+matplotlib = "^3.8.2"
+segmentation-models-pytorch = "^0.3.3"
 
 [tool.poetry.scripts]
 darren = 'darrennet.main:main'
