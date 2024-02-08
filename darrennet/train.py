@@ -46,9 +46,9 @@ def model_train(
         None.
     """
 
-    best_iou_score = 0.0
+    best_loss = float("inf")
     bad_epochs = 0
-    patience = 6
+    patience = 20
 
     progress = Progress(
         TextColumn("[cyan]{task.description}"),
@@ -72,7 +72,12 @@ def model_train(
 
                 optimizer.zero_grad()
                 # Compute loss
-                loss = criterion(outputs, labels)
+
+                # print(outputs.shape, labels.shape)
+                # labels = F.one_hot(labels.long(), 21)  # (16,224,224,21)
+                # labels = labels.permute(0, 3, 1, 2).float()
+
+                loss = criterion(outputs, labels.long())
                 # Backpropagate
                 loss.backward()
                 # Update weights
@@ -84,13 +89,14 @@ def model_train(
                     description=f"Epoch {epoch}, IOU: n/a, Acc: n/a, Loss: {loss.item():.2f}",
                 )
 
-            cos_opt.step()
+            if cos_opt is not None:
+                cos_opt.step()
             current_miou_score, pixel_acc, loss = evaluate_validation(
                 model, criterion, epoch, validation_loader, device
             )
 
-            if current_miou_score > best_iou_score:
-                best_iou_score = current_miou_score
+            if loss < best_loss:
+                best_loss = loss
                 torch.save(model.state_dict(), CURRENT_MODEL_PATH)
                 bad_epochs = 0
                 # save the best model
@@ -104,7 +110,7 @@ def model_train(
             assert loss is not None
             prog.update(
                 train_bar,
-                description=f"Epoch {epoch}, IOU: {current_miou_score:.2f}, Acc: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
+                description=f"Epoch {epoch}, IOU: {current_miou_score:.2e}, Acc: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
             )
             prog.update(
                 epoch_bar,
@@ -147,7 +153,7 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
             label = label.to(device)
 
             output = model(input)
-            loss = criterion(output, label)
+            loss = criterion(output, label.long())
 
             losses.append(loss.item())
             iou = util.compute_iou(output, label)
@@ -199,7 +205,7 @@ def model_test(model, criterion, test_loader, device):
             iou = util.compute_iou(output, label)
             mean_iou_scores.append(iou)
 
-            acc = util.compute_pixel_accuracy(output, label)
+            acc = util.compute_pixel_accuracy(output, label.long())
             accuracy.append(acc)
 
     print(f"Average Loss: {np.mean(losses)}")
