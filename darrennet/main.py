@@ -1,5 +1,6 @@
 import json
 import os
+import matplotlib.pyplot as plt
 
 import click
 import numpy as np
@@ -14,10 +15,10 @@ from . import theme
 from .basic_fcn import FCN
 from .dataset import download_data, get_frequency_spectrum, load_dataset
 from .erfnet import ERF
-from .train import model_test, model_train
+from .train import model_test, model_train, export_model
 from .unet import UNet
 from .unet_resnet import UNetResnet
-from .util import display_images, find_device
+from .util import display_images, find_device, compare_images
 
 models_dir = "./models"
 os.makedirs(models_dir, exist_ok=True)
@@ -267,6 +268,14 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
             cos_opt,
         )
 
+        plt.plot(training_losses)
+        plt.plot(validation_losses)
+        plt.title("Train and Valid Set Loss")
+        plt.xlabel("Epoch")
+        plt.ylabel("Loss")
+        plt.legend()
+        plt.show()
+
         theme.print("Testing network...")
         model_test(
             fcn_model,
@@ -305,8 +314,17 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
 
 @click.option("-l", "--load", help="Loads cached model.")
 @click.option("-d", "--display", is_flag=True)
+@click.option("-c", "--compare")
 @main.command(cls=HelpColorsCommand)
-def insight(load, display):
+def insight(load, display, compare):
+    if compare:
+        files = []
+        for file in os.listdir(os.getcwd() + "/models"):
+            if file.endswith(".pkl"): files.append(file)
+        
+        compare_images(files, compare)
+        return
+
     """Run inference on the model."""
     path = os.path.join(models_dir, load + ".pkl")
     model = torch.load(path)
