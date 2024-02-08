@@ -147,6 +147,7 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
     mean_iou_scores = []
     accuracy = []
 
+
     with torch.no_grad():
         for input, label in val_loader:
             input = input.to(device)
@@ -195,7 +196,13 @@ def model_test(model, criterion, test_loader, device):
     mean_iou_scores = []
     accuracy = []
 
+    total_loss = 0.0
+    total_iou = 0.0
+    total_pixel_acc = 0.0
+    total_samples = 0
+
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
+
         for input, label in test_loader:
             input = input.to(device)
             label = label.to(device)
