@@ -33,4 +33,10 @@ With the rise of ReLU, the nonlinearity can no longer be assumed to be symmetric
 where $n_i$ is the number of incoming network connections. As such, weights initially chosen from a normal distribution should be weighted by $\sqrt{\frac{n_{i}}{2}}$, with bias tensors initalized to zero.
 
 \subsection*{Batch Normalization}
+During the training of a neural network, at each layer, inputs (activations) change as the parameters of the previous layers get updated. Batch normalization normalizes the activations of each layer by subtracting the mean and dividing by the standard deviation of the activations within a mini-batch. We implement batch normalization using PyTorch's \texttt{nn} module implementation. For example, we define a layer used for batch normalization as
 
+\begin{center}
+\texttt{self.bnd1 = nn.BatchNorm2d(32)}
+\end{center} 
+
+This ensures that the inputs to each layer have a consistent distribution, which helps in stabilizing the training process.
