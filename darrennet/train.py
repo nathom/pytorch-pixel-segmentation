@@ -60,6 +60,7 @@ def model_train(
         console=console,
     )
 
+    losses, accs, ious = [], [], []
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
@@ -95,6 +96,9 @@ def model_train(
                 model, criterion, epoch, validation_loader, device
             )
 
+            losses.append(float(loss.item()))
+            ious.append(float(current_miou_score))
+            accs.append(float(pixel_acc))
             if loss < best_loss:
                 best_loss = loss
                 torch.save(model, CURRENT_MODEL_PATH)
@@ -117,6 +121,8 @@ def model_train(
                 advance=1,
                 description=f"All Epochs, IOU: {current_miou_score:.2f}, Patience: {bad_epochs}",
             )
+
+        return losses, ious, accs
 
 
 # TODO
@@ -146,7 +152,6 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
     losses = []
     mean_iou_scores = []
     accuracy = []
-
 
     with torch.no_grad():
         for input, label in val_loader:
@@ -202,7 +207,6 @@ def model_test(model, criterion, test_loader, device):
     total_samples = 0
 
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
-
         for input, label in test_loader:
             input = input.to(device)
             label = label.to(device)
