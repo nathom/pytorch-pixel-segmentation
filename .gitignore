@@ -168,6 +168,7 @@ darrennet/.DS_Store
 writeup/*
 !writeup/*.tex
 !writeup/*.sty
+!writeup/*.bib
 !writeup/sections/
 !writeup/sections/*.tex
 !writeup/images/

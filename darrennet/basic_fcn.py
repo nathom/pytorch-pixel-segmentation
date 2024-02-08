@@ -81,6 +81,7 @@ class FCN(nn.Module):
         )
         self.bn5 = nn.BatchNorm2d(32)
         self.classifier = nn.Conv2d(32, self.n_class, kernel_size=1)
+        self.softmax = nn.Softmax(dim=1)
 
     def forward(self, x):
         # Encoder forward
@@ -98,5 +99,7 @@ class FCN(nn.Module):
         y5 = self.bn5(self.relu(self.deconv5(y4)))
 
         score = self.classifier(y5)  # (16, 21, 224, 224)
+        output = self.softmax(score)
 
-        return score  # size=(batch size, n_class, H of image, W of image)
+        # return score  # size=(batch size, n_class, H of image, W of image)
+        return output  # size=(batch size, n_class, H of image, W of image)

@@ -58,6 +58,7 @@ def model_train(
         TimeRemainingColumn(),
         TimeElapsedColumn(),
         console=console,
+        transient=True,
     )
 
     losses, accs, ious = [], [], []
@@ -115,6 +116,7 @@ def model_train(
             prog.update(
                 train_bar,
                 description=f"Epoch {epoch}, IOU: {current_miou_score:.2e}, Acc: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
+                visible=False,
             )
             prog.update(
                 epoch_bar,
