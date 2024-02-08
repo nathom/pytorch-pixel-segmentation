@@ -97,7 +97,7 @@ def model_train(
 
             if loss < best_loss:
                 best_loss = loss
-                torch.save(model.state_dict(), CURRENT_MODEL_PATH)
+                torch.save(model, CURRENT_MODEL_PATH)
                 bad_epochs = 0
                 # save the best model
             else:
