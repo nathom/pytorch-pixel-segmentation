@@ -2,15 +2,15 @@
 % In the Methods section, you should describe the implementation and architectural details of your system - in particular, this addresses how you approached the problem and the design of your solution. For those who believe in reproducible science, this should be fine-grained enough such that somebody could implement your model/algorithm and reproduce the results you claim to achieve.
 
 \begin{figure}[htbp]
-    \centering
-    \includegraphics[width=\textwidth]{images/architecture}
-    \caption{Visualization of System Architecture}
-    \label{fig:architecture}
+	\centering
+	\includegraphics[width=\textwidth]{images/architecture}
+	\caption{Visualization of System Architecture}
+	\label{fig:architecture}
 \end{figure}
 
 \section*{Baseline}
 % (a) Baseline (5 pt): You should describe the baseline architecture, stating the appropriate activation function on the last layer of the network, the loss criterion, weights initialization scheme and the gradient descent optimizer you used.
-Our baseline architecture consists of an encoder, decoder, classifier, and activation. We used the Adam gradient descent optimizer 
+Our baseline architecture consists of an encoder, decoder, classifier, and activation. We used the Adam gradient descent optimizer
 
 \subsubsection*{Encoder}
 We have five convolutional layers that increases the depth of the orginal 3 channels to 32 to 64 to 128 to 256 to 512 each using a size 3 kernel, padding of 1, a stride of 2, and no dilation. Each layer sees a small decrease in the height and width of the layer according to the expression $\frac{W - F + 2P}{2} + 1$. The outputs of each convolutional layer are subsequently passed through a ReLU activation function and a batch normalization layer.
@@ -31,9 +31,77 @@ To enhance the robustness of our model, we applied data augmentation techniques 
 In order to optimize the learning rate dynamically throughout the training process, we implemented the cosine annealing learning rate scheduler. This technique adjusts the learning rate in a cosine-shaped manner, effectively annealing it towards zero as training progresses. By aligning the learning rate adjustments with the number of epochs, we aim to improve the convergence and generalization capabilities of our model.
 
 \subsubsection*{Class Imbalance}
-To mitigate the challenges posed by class imbalance, particularly addressing rare classes, we employed strategies to alleviate this issue. One approach is to apply a weighted loss criterion, which assigns higher weights to the infrequent classes during the optimization process. By doing so, we incentivize the network to pay more attention to these underrepresented classes, thus improving its ability to accurately classify them. Otherwise, the model could simply learn to label the entire image the background and still achieve decent pixel accuracy. 
+To mitigate the challenges posed by class imbalance, particularly addressing rare classes, we employed strategies to alleviate this issue. One approach is to apply a weighted loss criterion, which assigns higher weights to the infrequent classes during the optimization process. By doing so, we incentivize the network to pay more attention to these underrepresented classes, thus improving its ability to accurately classify them. Otherwise, the model could simply learn to label the entire image the background and still achieve decent pixel accuracy.
 
 \section*{Experimentation}
 
 % (c) Experimentation (10 pt): Describe your two experimental CNN architectures(parts 5.a and 5.b) and the U-Net, each in a table, which the first column indicate the particular layer of your network, and the other columns state the layer’s dimensions (e.g. in-channels, out-channels, kernel-size, padding/stride) and activation function/non-linearity. Describe any regularization techniques (e.g. data augmentation) you used, parameter initialization methods, gradient descent optimization, and how you addressed the class-imbalance problem .
+\subsection*{DarrenNet}
+\begin{table}[htbp]
+	\centering
+	\label{tab:example}
+	\setlength{\abovecaptionskip}{10pt}
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
+		Layer 1        & -           & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Layer 2        & 64          & 128          & 1                & 3x3             & 2               & ReLU                \\ \hline
+		Layer 3        & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+	\end{tabular}
+	\caption{DarrenNet Architecture}
+\end{table}
+
+\subsection*{DarrenYuNet}
+\begin{table}[htbp]
+	\centering
+	\label{tab:darren}
+	\setlength{\abovecaptionskip}{10pt}
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
+		Layer 1        & -           & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
+		Layer 2        & 64          & 128          & 1                & 3x3             & 2               & ReLU                \\ \hline
+		Layer 3        & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
+	\end{tabular}
+	\caption{DarrenYuNet (Transfer Learning) Architecture}
+\end{table}
+
+\subsection*{UNet}
+\begin{table}[htbp]
+	\centering
+	\label{tab:unet}
+	\setlength{\abovecaptionskip}{10pt}
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
+		conv1          & 3           & 64           & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv2          & 64          & 64           & 1                & 3x3             & 1               & ReLU                \\ \hline
+		pool1          & 64          & 64           & 0                & 2x2             & 2               &                     \\ \hline
+		conv3          & 64          & 128          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv4          & 128         & 128          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		pool2          & 128         & 128          & 0                & 2x2             & 2               &                     \\ \hline
+		conv5          & 128         & 256          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv6          & 256         & 256          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		pool3          & 256         & 256          & 0                & 2x2             & 2               &                     \\ \hline
+		conv7          & 256         & 512          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv8          & 512         & 512          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		pool4          & 512         & 512          & 0                & 2x2             & 2               &                     \\ \hline
+		conv9          & 512         & 1024         & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv10         & 1024        & 1024         & 1                & 3x3             & 1               & ReLU                \\ \hline
+		deconv1        & 1024        & 512          & 0                & 2x2             & 2               & ReLU                \\ \hline
+		conv11         & 1024        & 512          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv12         & 512         & 512          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		deconv2        & 512         & 256          & 0                & 2x2             & 2               & ReLU                \\ \hline
+		conv13         & 512         & 256          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv14         & 256         & 256          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		deconv3        & 256         & 128          & 0                & 2x2             & 2               & ReLU                \\ \hline
+		conv15         & 256         & 128          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv16         & 128         & 128          & 1                & 3x3             & 1               & ReLU                \\ \hline
+		deconv4        & 128         & 64           & 0                & 2x2             & 2               & ReLU                \\ \hline
+		conv17         & 64          & 64           & 1                & 3x3             & 1               & ReLU                \\ \hline
+		conv18         & 64          & 64           & 1                & 3x3             & 1               & ReLU                \\ \hline
+		output         & 64          & 21           & 0                & 1x1             & 1               & ReLU                \\ \hline
+	\end{tabular}
+	\caption{U-Net Architecture}
+\end{table}
 
