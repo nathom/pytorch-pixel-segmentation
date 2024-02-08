@@ -48,7 +48,7 @@ def model_train(
 
     best_loss = float("inf")
     bad_epochs = 0
-    patience = 20
+    patience = 40
 
     progress = Progress(
         TextColumn("[cyan]{task.description}"),
@@ -60,6 +60,7 @@ def model_train(
         console=console,
     )
 
+    losses, accs, ious = [], [], []
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
@@ -76,7 +77,7 @@ def model_train(
                 # print(outputs.shape, labels.shape)
                 # labels = F.one_hot(labels.long(), 21)  # (16,224,224,21)
                 # labels = labels.permute(0, 3, 1, 2).float()
-
+                labels = labels.squeeze(1)
                 loss = criterion(outputs, labels.long())
                 # Backpropagate
                 loss.backward()
@@ -95,6 +96,9 @@ def model_train(
                 model, criterion, epoch, validation_loader, device
             )
 
+            losses.append(loss)
+            ious.append(current_miou_score)
+            accs.append(pixel_acc)
             if loss < best_loss:
                 best_loss = loss
                 torch.save(model, CURRENT_MODEL_PATH)
@@ -117,6 +121,8 @@ def model_train(
                 advance=1,
                 description=f"All Epochs, IOU: {current_miou_score:.2f}, Patience: {bad_epochs}",
             )
+
+    return losses, ious, accs
 
 
 # TODO
@@ -147,13 +153,13 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
     mean_iou_scores = []
     accuracy = []
 
-
     with torch.no_grad():
         for input, label in val_loader:
             input = input.to(device)
             label = label.to(device)
 
             output = model(input)
+            label = label.squeeze(1)
             loss = criterion(output, label.long())
 
             losses.append(loss.item())
@@ -202,12 +208,12 @@ def model_test(model, criterion, test_loader, device):
     total_samples = 0
 
     with torch.no_grad():  # we don't need to calculate the gradient in the validation/testing
-
         for input, label in test_loader:
             input = input.to(device)
             label = label.to(device)
             output = model(input)
-            loss = criterion(output, label)
+            label = label.squeeze(1)
+            loss = criterion(output, label.long())
             losses.append(loss.item())
             iou = util.compute_iou(output, label)
             mean_iou_scores.append(iou)
