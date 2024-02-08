@@ -72,7 +72,6 @@ def data(augment, load):
     train_loader, val_loader, test_loader = load_dataset(aug, None, None)
     for inputs, labels in train_loader:
         display_images(inputs, labels)
-        break
     for inputs, labels in val_loader:
         display_images(inputs, labels)
         break
@@ -82,6 +81,9 @@ def data(augment, load):
 
 
 def validate_filepath(ctx, param, value):
+    if value is None:
+        theme.print("WARNING: NOT SAVING MODEL!")
+        return value
     path1 = os.path.join(models_dir, value + ".pkl")
     path2 = os.path.join(models_dir, value + ".json")
     if value and os.path.exists(path1) or os.path.exists(path2):
@@ -108,6 +110,11 @@ def validate_filepath(ctx, param, value):
     is_flag=True,
 )
 @click.option(
+    "--dice",
+    help="Use dice loss",
+    is_flag=True,
+)
+@click.option(
     "-s",
     "--save",
     help="Saves model to directory with specified name.",
@@ -115,7 +122,7 @@ def validate_filepath(ctx, param, value):
 )
 @click.option("--epochs", type=int, default=150, help="Number of epochs")
 @main.command(cls=HelpColorsCommand)
-def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs):
+def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs, dice):
     """Train the model."""
     n_class = 21
     device = find_device()
@@ -127,10 +134,16 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
         fcn_model = smp.create_model("unetplusplus", classes=21)
-        learning_rate = 1e-4
+        learning_rate = 1e-3
     elif smp_module == "unet":
         theme.print("Using smp unet")
-        fcn_model = smp.create_model("unet", classes=21)
+        # aux_params = dict(
+        #     pooling="max",  # one of 'avg', 'max'
+        #     dropout=0.5,  # dropout ratio, default is None
+        #     # activation="sigmoid",  # activation function, default is None
+        #     classes=21,  # define number of output labels
+        # )
+        fcn_model = smp.create_model("unet", classes=21, aux_params=None)
         learning_rate = 1e-3
     elif smp_module == "manet":
         theme.print("Using smp manet")
@@ -189,8 +202,10 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
     augment_transform = get_augment_transforms(augment)
     optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=learning_rate)
     theme.print(f"Learning rate: {learning_rate}, weight decay: {1e-4}")
-    criterion = torch.nn.CrossEntropyLoss(weight=weights)
-    criterion = smp.losses.DiceLoss(smp.losses.MULTICLASS_MODE)
+    if dice:
+        criterion = smp.losses.DiceLoss(smp.losses.MULTICLASS_MODE)
+    else:
+        criterion = torch.nn.CrossEntropyLoss(weight=weights)
 
     if not no_cosine:
         theme.print("Using cosine LR")
@@ -319,7 +334,9 @@ def get_augment_transforms(augment: str | None):
     if augment is not None:
         if "a" in augment:
             theme.print("Affine transform selected.")
-            augment_transforms.append(v2.RandomAffine((-20, 20), translate=(0, 0.2)))
+            augment_transforms.append(
+                v2.RandomAffine(degrees=(-20, 20), shear=(-20, 20))
+            )
         if "v" in augment:
             theme.print("Vertical flip transform selected.")
             augment_transforms.append(v2.RandomVerticalFlip(0.5))

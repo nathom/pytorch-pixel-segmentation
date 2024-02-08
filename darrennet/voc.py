@@ -165,8 +165,8 @@ class VOC(data.Dataset):
         img = Image.open(img_path).convert("RGB").resize((224, 224))
         mask = Image.open(mask_path).resize((224, 224))
 
-        # if self.mode == "train" and self.augmentation is not None:
-        #     img, mask = self.augmentation(img, mask)
+        if self.mode == "train" and self.augmentation is not None:
+            img, mask = self.augmentation(img, mask)
 
         if self.transform is not None:
             img = self.transform(img)

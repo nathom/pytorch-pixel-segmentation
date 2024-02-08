@@ -70,6 +70,9 @@ def model_train(
                 inputs = inputs.to(device)
                 labels = labels.to(device)
                 outputs = model(inputs)
+                # print(type(outputs), len(outputs))
+                # print(outputs)
+                # exit(1)
 
                 optimizer.zero_grad()
                 # Compute loss
@@ -115,6 +118,7 @@ def model_train(
             prog.update(
                 train_bar,
                 description=f"Epoch {epoch}, IOU: {current_miou_score:.2e}, Acc: {100*pixel_acc:.2f}% Loss: {loss:.2f}",
+                visible=False,
             )
             prog.update(
                 epoch_bar,
