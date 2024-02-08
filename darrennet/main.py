@@ -2,6 +2,7 @@ import os
 
 import click
 import numpy as np
+import segmentation_models_pytorch as smp
 import torch
 from click_help_colors import HelpColorsCommand, HelpColorsGroup
 from rich.traceback import install
@@ -14,12 +15,14 @@ from .dataset import download_data, get_frequency_spectrum, load_dataset
 from .erfnet import ERF
 from .train import model_test, model_train
 from .unet import UNet
-from .util import find_device
+from .unet_resnet import UNetResnet
+from .util import display_images, find_device
 
 models_dir = "./models"
 os.makedirs(models_dir, exist_ok=True)
 
-install(show_locals=True)
+install(show_locals=False)
+torch.manual_seed(42)
 
 
 class MaskToTensor(object):
@@ -58,13 +61,36 @@ def info():
     get_frequency_spectrum()
 
 
+@click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
+@click.option("-l", "--load", help="Load model")
+@main.command(cls=HelpColorsCommand)
+def data(augment, load):
+    aug = get_augment_transforms(augment)
+    # aug = None
+    train_loader, val_loader, test_loader = load_dataset(aug, None, None)
+    for inputs, labels in train_loader:
+        display_images(inputs, labels)
+        break
+    for inputs, labels in val_loader:
+        display_images(inputs, labels)
+        break
+    for inputs, labels in test_loader:
+        display_images(inputs, labels)
+        break
+
+
 @click.option("-w", "--weight", help="Weight loss by inverse frequency.", is_flag=True)
 @click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
 @click.option("-e", "--erfnet", help="Use ERFNet", is_flag=True)
 @click.option("-u", "--unet", help="Use UNet", is_flag=True)
+@click.option("-smp", "--smp-module", help="Use UNet", is_flag=True)
+@click.option("-c", "--cosine", help="Use cosine LR", is_flag=True)
+@click.option(
+    "-ur", "--unet-resnet", help="Use UNet with resnet backbone", is_flag=True
+)
 @click.option("-s", "--save", help="Saves model to directory with specified name.")
 @main.command(cls=HelpColorsCommand)
-def cook(weight, augment, erfnet, save, unet):
+def cook(weight, augment, erfnet, save, unet, unet_resnet, smp_module, cosine):
     """Train the model."""
     epochs = 150
     n_class = 21
@@ -74,10 +100,18 @@ def cook(weight, augment, erfnet, save, unet):
         theme.print("Using ERFNet")
         fcn_model = ERF(num_classes=n_class, input_channels=3)
         learning_rate = 5e-4
+    elif smp_module:
+        theme.print("using smp")
+        fcn_model = smp.create_model("unet", classes=21)
+        learning_rate = 1e-4
     elif unet:
         theme.print("using UNet")
         fcn_model = UNet(3, n_class)
         learning_rate = 1e-3
+    elif unet_resnet:
+        theme.print("using UNet with pretrained ResNet backbone")
+        fcn_model = UNetResnet(n_class, freeze_backbone=True)
+        learning_rate = 1e-2
     else:
         theme.print("Using FCN")
         fcn_model = FCN(n_class=n_class)
@@ -115,49 +149,39 @@ def cook(weight, augment, erfnet, save, unet):
     else:
         weights = None
 
-    augment_transforms: list[v2.Transform] = [v2.ToImage()]
-    if augment is not None:
-        if "a" in augment:
-            theme.print("Affine transform selected.")
-            augment_transforms.append(v2.RandomAffine((-20, 20), translate=(0, 0.2)))
-        if "v" in augment:
-            theme.print("Vertical flip transform selected.")
-            augment_transforms.append(v2.RandomVerticalFlip(0.5))
-        if "h" in augment:
-            theme.print("Horizontal flip transform selected.")
-            augment_transforms.append(v2.RandomHorizontalFlip(0.5))
-        if "r" in augment:
-            theme.print("Resized Crop transform selected.")
-            augment_transforms.append(v2.RandomResizedCrop((224, 224)))
-
-    augment_transform = v2.Compose(augment_transforms)
-
-    optimizer = torch.optim.Adam(
-        params=fcn_model.parameters(), lr=learning_rate, weight_decay=1e-4
-    )
+    augment_transform = get_augment_transforms(augment)
+    optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=learning_rate)
     theme.print(f"Learning rate: {learning_rate}, weight decay: {1e-4}")
-    criterion = torch.nn.CrossEntropyLoss(weight=weights)
+    # criterion = torch.nn.CrossEntropyLoss(weight=weights)
+    criterion = smp.losses.DiceLoss(smp.losses.MULTICLASS_MODE)
 
-    cos_opt = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
-
+    if cosine:
+        theme.print("using cosine LR")
+        cos_opt = torch.optim.lr_scheduler.CosineAnnealingLR(optimizer, T_max=epochs)
+    else:
+        cos_opt = None
     fcn_model = fcn_model.to(device)
-    mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    # mean, std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    mean, std = ([103.939, 116.779, 123.68], [1.0, 1.0, 1.0])
+
     # Final transform for input
     input_transform = v2.Compose(
         [
             v2.ToImage(),
             # v2.Resize((224, 224)),
             v2.ToDtype(torch.float32, scale=True),
-            v2.Normalize(*mean_std),
+            # v2.Normalize(mean, std),
         ]
     )
 
     mask_transform = v2.Compose(
         [
             v2.ToImage(),
+            v2.ToDtype(torch.long),
+            # v2.ToImage(),
             # v2.Resize((224, 224)),
             # Change shape from (1,224,224) -> (224, 224)
-            v2.Lambda(lambda x: torch.squeeze(x, dim=0)),
+            # v2.Lambda(lambda x: torch.squeeze(x, dim=0)),
         ]
     )
 
@@ -167,6 +191,17 @@ def cook(weight, augment, erfnet, save, unet):
         mask_transform,
     )
 
+    # for inputs, labels in train_loader:
+    #     display_images(None, labels)
+    #     break
+    # for inputs, labels in val_loader:
+    #     display_images(None, labels)
+    #     break
+    # for inputs, labels in test_loader:
+    #     display_images(None, labels)
+    #     break
+    # exit(1)
+    #
     theme.print("Training network...")
     model_train(
         fcn_model,
@@ -194,8 +229,9 @@ def cook(weight, augment, erfnet, save, unet):
 
 
 @click.option("-l", "--load", help="Loads cached model.")
+@click.option("-d", "--display", is_flag=True)
 @main.command(cls=HelpColorsCommand)
-def insight(load):
+def insight(load, display):
     """Run inference on the model."""
     path = os.path.join(models_dir, load + ".pkl")
     model = torch.load(path)
@@ -203,19 +239,51 @@ def insight(load):
     theme.print("Loading network and running inference...")
     device = find_device()
     criterion = torch.nn.CrossEntropyLoss()
-    mean_std = ([0.485, 0.456, 0.406], [0.229, 0.224, 0.225])
+    mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
+    inverse_normalize = v2.Normalize(
+        mean=[-mean[i] / std[i] for i in range(3)], std=[1 / std[i] for i in range(3)]
+    )
     input_transform = v2.Compose(
         [
             v2.ToImage(),
             # v2.Resize((224, 224)),
             v2.ToDtype(torch.float32, scale=True),
-            v2.Normalize(*mean_std),
+            v2.Normalize(mean, std),
         ]
     )
 
-    _, _, test_loader = load_dataset(None, input_transform, MaskToTensor())
+    train_loader, _, test_loader = load_dataset(None, input_transform, MaskToTensor())
 
     model_test(model, criterion, test_loader, device)
+
+    if display:
+        for inputs, labels in train_loader:
+            labels = v2.ToDtype(torch.uint8)(labels)
+            inputs2 = inverse_normalize(inputs)
+            outputs = model(inputs.to(device)).cpu().detach().numpy()
+            outputs = np.argmax(outputs, axis=1).astype(np.uint8)
+            display_images(inputs2.cpu(), outputs)
+            break
+
+
+def get_augment_transforms(augment: str | None):
+    augment_transforms: list[v2.Transform] = [v2.ToImage()]
+    if augment is not None:
+        if "a" in augment:
+            theme.print("Affine transform selected.")
+            augment_transforms.append(v2.RandomAffine((-20, 20), translate=(0, 0.2)))
+        if "v" in augment:
+            theme.print("Vertical flip transform selected.")
+            augment_transforms.append(v2.RandomVerticalFlip(0.5))
+        if "h" in augment:
+            theme.print("Horizontal flip transform selected.")
+            augment_transforms.append(v2.RandomHorizontalFlip(0.5))
+        if "r" in augment:
+            theme.print("Resized Crop transform selected.")
+            augment_transforms.append(v2.RandomResizedCrop((224, 224)))
+
+    augment_transforms.append(v2.ToPILImage())
+    return v2.Compose(augment_transforms)
 
 
 if __name__ == "__main__":

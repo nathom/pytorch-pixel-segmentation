@@ -113,6 +113,7 @@ def make_dataset(mode):
     elif mode == "val":
         img_names = voc_2007 / "ImageSets" / "Segmentation" / "val.txt"
     else:
+        voc_2007 = root / "VOCdevkit" / "VOC2007"
         img_names = voc_2007 / "ImageSets" / "Segmentation" / "test.txt"
 
     with open(img_names) as file:
@@ -164,14 +165,20 @@ class VOC(data.Dataset):
         img = Image.open(img_path).convert("RGB").resize((224, 224))
         mask = Image.open(mask_path).resize((224, 224))
 
-        if self.mode == "train" and self.augmentation is not None:
-            img, mask = self.augmentation(img, mask)
+        # if self.mode == "train" and self.augmentation is not None:
+        #     img, mask = self.augmentation(img, mask)
 
         if self.transform is not None:
             img = self.transform(img)
+        else:
+            t = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32)])
+            img = t(img)
 
         if self.target_transform is not None:
             mask: torch.Tensor = self.target_transform(mask)
+        else:
+            t = v2.Compose([v2.ToImage(), v2.ToDtype(torch.float32)])
+            mask = t(mask)
 
         mask[mask == ignore_label] = 0
 
