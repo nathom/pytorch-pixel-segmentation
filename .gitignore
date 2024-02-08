@@ -178,3 +178,4 @@ models/
 
 # Ignore file that trains with cuda
 cuda.py
+/models
