@@ -48,7 +48,7 @@ def model_train(
 
     best_loss = float("inf")
     bad_epochs = 0
-    patience = 20
+    patience = 40
 
     progress = Progress(
         TextColumn("[cyan]{task.description}"),
@@ -77,7 +77,7 @@ def model_train(
                 # print(outputs.shape, labels.shape)
                 # labels = F.one_hot(labels.long(), 21)  # (16,224,224,21)
                 # labels = labels.permute(0, 3, 1, 2).float()
-
+                labels = labels.squeeze(1)
                 loss = criterion(outputs, labels.long())
                 # Backpropagate
                 loss.backward()
@@ -159,6 +159,7 @@ def evaluate_validation(model, criterion, epoch, val_loader, device):
             label = label.to(device)
 
             output = model(input)
+            label = label.squeeze(1)
             loss = criterion(output, label.long())
 
             losses.append(loss.item())
@@ -211,7 +212,8 @@ def model_test(model, criterion, test_loader, device):
             input = input.to(device)
             label = label.to(device)
             output = model(input)
-            loss = criterion(output, label)
+            label = label.squeeze(1)
+            loss = criterion(output, label.long())
             losses.append(loss.item())
             iou = util.compute_iou(output, label)
             mean_iou_scores.append(iou)
