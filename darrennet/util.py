@@ -142,7 +142,7 @@ def export_model(fcn_model, device, inputs):
     fcn_model.train()
     return output_image
 
-def compare_images(model_paths, img_cnt=1):
+def compare_images(model_paths, img_idx=0, img_cnt=1):
     num_to_class = {0:"background", 1:"aeroplane", 2:"bicycle", 3:"bird", 4:"boat", 5:"bottle",
                  6:"bus", 7:"car", 8:"cat", 9:"chair", 10:"cow", 11:"dining table", 12:"dog",
                  13:"horse", 14:"motorbike", 15:"person", 16:"potted plant", 17:"sheep",
@@ -171,7 +171,10 @@ def compare_images(model_paths, img_cnt=1):
     )
 
     train, val, test = load_dataset(None, input_transform, mask_transform, size=1)
+    if img_idx < 0 or img_idx > len(test) - 1: img_idx = 0
+
     first_batch = iter(test)
+    for _ in range(img_idx): next(first_batch)
 
     # Create models here
     models = [torch.load(os.path.join("models/" + m)) for m in model_paths]
@@ -179,7 +182,7 @@ def compare_images(model_paths, img_cnt=1):
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
     model_paths.insert(0, "Ground Truth")
-    for _ in range(int(img_cnt)):
+    for _ in range(img_cnt):
         img, msk = next(first_batch)
         true_classes = [num_to_class[i] for i in torch.unique(msk).numpy()]
         print("Ground True Classes:", true_classes,"\n")

@@ -328,8 +328,7 @@ def insight(load, display, compare):
         files = []
         for file in os.listdir(os.getcwd() + "/models"):
             if file.endswith(".pkl"): files.append(file)
-        
-        compare_images(files, compare)
+        compare_images(files, int(compare), 1)
         return
 
     """Run inference on the model."""
