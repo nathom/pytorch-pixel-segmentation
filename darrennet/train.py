@@ -61,6 +61,7 @@ def model_train(
     )
 
     losses, accs, ious = [], [], []
+    training_losses = []
     with progress as prog:
         epoch_bar = prog.add_task("All Epochs", total=epochs)
         for epoch in range(epochs):
@@ -82,6 +83,7 @@ def model_train(
                 # labels = labels.permute(0, 3, 1, 2).float()
                 labels = labels.squeeze(1)
                 loss = criterion(outputs, labels.long())
+                training_losses.append(float(loss.item()))
                 # Backpropagate
                 loss.backward()
                 # Update weights
@@ -126,7 +128,7 @@ def model_train(
                 description=f"All Epochs, IOU: {current_miou_score:.2f}, Patience: {bad_epochs}",
             )
 
-        return losses, ious, accs
+        return losses, training_losses, ious, accs
 
 
 # TODO

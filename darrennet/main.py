@@ -244,9 +244,19 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
     )
 
     theme.print("Training network...")
-    validation_losses, validation_ious, validation_accs = None, None, None
+    validation_losses, training_losses, validation_ious, validation_accs = (
+        None,
+        None,
+        None,
+        None,
+    )
     try:
-        validation_losses, validation_ious, validation_accs = model_train(
+        (
+            validation_losses,
+            training_losses,
+            validation_ious,
+            validation_accs,
+        ) = model_train(
             fcn_model,
             optimizer,
             criterion,
@@ -284,6 +294,7 @@ def cook(augment, erfnet, save, unet, unet_resnet, smp_module, no_cosine, epochs
                         "no_cosine": no_cosine,
                         "epochs": epochs,
                         "loss": validation_losses,
+                        "training_loss": training_losses,
                         "ious": validation_ious,
                         "accs": validation_accs,
                     },
