@@ -58,6 +58,7 @@ def model_train(
         TimeRemainingColumn(),
         TimeElapsedColumn(),
         console=console,
+        transient=True,
     )
 
     losses, accs, ious = [], [], []

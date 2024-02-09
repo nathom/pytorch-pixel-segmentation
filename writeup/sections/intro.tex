@@ -36,7 +36,46 @@ where $n_i$ is the number of incoming network connections. As such, weights init
 During the training of a neural network, at each layer, inputs (activations) change as the parameters of the previous layers get updated. Batch normalization normalizes the activations of each layer by subtracting the mean and dividing by the standard deviation of the activations within a mini-batch. We implement batch normalization using PyTorch's \texttt{nn} module implementation. For example, we define a layer used for batch normalization as
 
 \begin{center}
-\texttt{self.bnd1 = nn.BatchNorm2d(32)}
-\end{center} 
+	\texttt{self.bnd1 = nn.BatchNorm2d(32)}
+\end{center}
 
 This ensures that the inputs to each layer have a consistent distribution, which helps in stabilizing the training process.
+
+\subsection*{Pixel Accuracy}
+Pixel accuracy is a straightforward evaluation metric commonly used in image classification tasks to measure the percentage of correctly classified pixels in an image. It provides a simple measure of overall accuracy without considering class imbalance.
+
+Pixel accuracy is calculated as:
+\begin{equation}
+	\text{Pixel Accuracy} = \frac{\text{Number of Correctly Classified Pixels}}{\text{Total Number of Pixels}}
+\end{equation}
+
+Where:
+\begin{itemize}
+	\item Number of Correctly Classified Pixels: The count of pixels for which the predicted class matches the ground truth class.
+	\item Total Number of Pixels: The total count of pixels in the image.
+\end{itemize}
+
+While pixel accuracy provides a quick measure of overall performance, it may not be the most informative metric for tasks with class imbalance or when individual classes are of interest.
+
+\subsection*{Intersection over Union (IoU)}
+Intersection over Union (IoU), also known as the Jaccard index, is a popular evaluation metric in semantic segmentation tasks. It measures the overlap between the predicted segmentation mask and the ground truth mask for each class. IoU provides a more nuanced understanding of model performance by considering both true positives and false positives.
+
+For a given class $c$, IoU is calculated as:
+\begin{equation}
+	IoU_c = \frac{\text{Area of Intersection between predicted and ground truth mask for class } c}{\text{Area of Union between predicted and ground truth mask for class } c}
+\end{equation}
+
+The overall IoU for all classes is often computed as the mean or weighted mean of individual class IoU scores:
+\begin{equation}
+	IoU = \frac{1}{N} \sum_{c=1}^{N} IoU_c
+\end{equation}
+
+Where:
+\begin{itemize}
+	\item $N$ is the total number of classes.
+	\item $IoU_c$ is the IoU score for class $c$.
+\end{itemize}
+
+IoU ranges from 0 to 1, with higher values indicating better segmentation accuracy. A value of 1 indicates perfect overlap between the predicted and ground truth masks, while a value of 0 indicates no overlap.
+
+IoU is particularly useful for tasks where precise localization and segmentation accuracy are essential, such as medical image analysis, object detection, and scene understanding. It provides insights into how well the model captures the spatial extent of different classes within the image.
