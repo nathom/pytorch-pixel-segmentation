@@ -790,10 +790,10 @@ INPUT ./writeup.out
 INPUT writeup.out
 INPUT ./writeup.out
 INPUT writeup.out
-OUTPUT writeup.pdf
 INPUT ./writeup.out
 INPUT ./writeup.out
 OUTPUT writeup.out
+OUTPUT writeup.pdf
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/microtype/mt-ptm.cfg
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/microtype/mt-ptm.cfg
 INPUT /usr/local/texlive/2023/texmf-dist/tex/latex/microtype/mt-ptm.cfg
@@ -927,6 +927,10 @@ INPUT ./plots/baseline_weights.png
 INPUT plots/baseline_weights.png
 INPUT ./plots/baseline_weights.png
 INPUT ./plots/baseline_weights.png
+INPUT ./plots/darrennet.png
+INPUT plots/darrennet.png
+INPUT ./plots/darrennet.png
+INPUT ./plots/darrennet.png
 INPUT ./plots/darrennet_transfer.png
 INPUT plots/darrennet_transfer.png
 INPUT ./plots/darrennet_transfer.png
@@ -947,6 +951,10 @@ INPUT ./plots/unet_transfer.png
 INPUT plots/unet_transfer.png
 INPUT ./plots/unet_transfer.png
 INPUT ./plots/unet_transfer.png
+INPUT ./plots/comparison.png
+INPUT plots/comparison.png
+INPUT ./plots/comparison.png
+INPUT ./plots/comparison.png
 INPUT ./sections/discussion.tex
 INPUT ./sections/discussion.tex
 INPUT ./sections/discussion.tex
