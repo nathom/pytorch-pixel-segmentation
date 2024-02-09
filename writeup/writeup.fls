@@ -854,6 +854,10 @@ INPUT sections/abstract.tex
 INPUT ./sections/abstract.tex
 INPUT ./sections/abstract.tex
 INPUT sections/abstract.tex
+INPUT ./plots/darren_inference.png
+INPUT plots/darren_inference.png
+INPUT ./plots/darren_inference.png
+INPUT ./plots/darren_inference.png
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/adobe/times/ptmr8t.tfm
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/tfm/adobe/times/ptmb8t.tfm
 INPUT /usr/local/texlive/2023/texmf-dist/fonts/vf/adobe/times/ptmb8t.vf
