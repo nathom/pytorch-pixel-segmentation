@@ -36,6 +36,8 @@ To mitigate the challenges posed by class imbalance, particularly addressing rar
 \section*{Experimentation}
 
 % (c) Experimentation (10 pt): Describe your two experimental CNN architectures(parts 5.a and 5.b) and the U-Net, each in a table, which the first column indicate the particular layer of your network, and the other columns state the layer’s dimensions (e.g. in-channels, out-channels, kernel-size, padding/stride) and activation function/non-linearity. Describe any regularization techniques (e.g. data augmentation) you used, parameter initialization methods, gradient descent optimization, and how you addressed the class-imbalance problem .
+In this work, we introduce DarrenNet, a novel architecture inspired by the erfnet architecture but distinguished by its enhanced efficiency and superior performance. Leveraging a modified erfnet structure, DarrenNet incorporates additional convolution layers and employs higher dropout, resulting in a more intricate and efficient network. The augmented convolutional layers contribute to a deeper understanding of spatial features, while increased dropout aids in regularization, preventing overfitting. The fusion of these modifications yields a model that not only operates more efficiently but also achieves superior performance in various tasks. We are also able to use pretrained erfnet encoders, which improve our performance further.
+
 Below are the descriptions (in table format) and regularization techniques used for each architecture.
 
 \subsection*{DarrenNet Architecture}
@@ -80,13 +82,13 @@ Below are the descriptions (in table format) and regularization techniques used 
 		\hline
 		\textbf{Layer Name} & \textbf{In}          & \textbf{Out}         & \textbf{Padding}      & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
 		\hline
-		conv1          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1, 0)                & 3x1               & 1               & ReLU                \\
+		conv1               & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1, 0)                & 3x1                  & 1               & ReLU                \\
 		\hline
-		conv2          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1)                & 1x3               & 1               & ReLU                \\
+		conv2               & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1)                & 1x3                  & 1               & ReLU                \\
 		\hline
-		conv3          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1$\times$dilated, 0) & 3x1               & 1               & ReLU                \\
+		conv3               & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1$\times$dilated, 0) & 3x1                  & 1               & ReLU                \\
 		\hline
-		conv4          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1$\times$dilated) & 1x3               & 1               & ReLU                \\
+		conv4               & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1$\times$dilated) & 1x3                  & 1               & ReLU                \\
 		\hline
 		bn1                 &                      &                      &                       &                      &                 &                     \\
 		\hline
@@ -105,11 +107,11 @@ Below are the descriptions (in table format) and regularization techniques used 
 		\hline
 		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}                                 & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
 		\hline
-		conv                & $in_{\text{channel}}$  & $out_{\text{channel}} - in_{\text{channel}}$ & 1           & 3x3               & 2               &                    \\
+		conv                & $in_{\text{channel}}$  & $out_{\text{channel}} - in_{\text{channel}}$ & 1                & 3x3                  & 2               &                     \\
 		\hline
-		pool                &                       &                                             &                 & 2x2               & 2               &                    \\
+		pool                &                        &                                              &                  & 2x2                  & 2               &                     \\
 		\hline
-		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$                       &                 &                     &                &                    \\
+		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$                       &                  &                      &                 &                     \\
 		\hline
 	\end{tabular}
 	\caption{DownsamplerBlock (DarrenNet)}
@@ -122,9 +124,9 @@ Below are the descriptions (in table format) and regularization techniques used 
 		\hline
 		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}           & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
 		\hline
-		conv                & $in_{\text{channel}}$  & $out_{\text{channel}}$ & (1, 1)           & 3x3               & 2               &                    \\
+		conv                & $in_{\text{channel}}$  & $out_{\text{channel}}$ & (1, 1)           & 3x3                  & 2               &                     \\
 		\hline
-		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$ &                 &                     &                &                    \\
+		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$ &                  &                      &                 &                     \\
 		\hline
 	\end{tabular}
 	\caption{UpsamplerBlock (DarrenNet)}
@@ -141,13 +143,13 @@ In our DarrenNet architecture, we use horizontal and vertical flipping, Kaiming 
 	\begin{tabular}{|c|c|c|c|c|c|c|}
 		\hline
 		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
-		encoder          &            &            &                 &              &                &                 \\ \hline
-		deconv1        & 512         & 256           & 1                & 3x3             & 2               & ReLU                \\ \hline
-		deconv1        & 512         & 256           & 1                & 3x3             & 2               & ReLU                \\ \hline
-		deconv2        & 256         & 128           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		encoder        &             &              &                  &                 &                 &                     \\ \hline
+		deconv1        & 512         & 256          & 1                & 3x3             & 2               & ReLU                \\ \hline
+		deconv1        & 512         & 256          & 1                & 3x3             & 2               & ReLU                \\ \hline
+		deconv2        & 256         & 128          & 1                & 3x3             & 2               & ReLU                \\ \hline
 		deconv3        & 128         & 64           & 1                & 3x3             & 2               & ReLU                \\ \hline
-		deconv4        & 64         & 32           & 1                & 3x3             & 2               & ReLU                \\ \hline
-		conv        & 32         & 21           & 1                & 3x3             & 2               & Softmax                \\ \hline
+		deconv4        & 64          & 32           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		conv           & 32          & 21           & 1                & 3x3             & 2               & Softmax             \\ \hline
 	\end{tabular}
 	\caption{Transfered Encoder to Basic FCN Architecture}
 \end{table}
@@ -196,4 +198,3 @@ In our DarrenNet architecture, we use horizontal and vertical flipping, Kaiming 
 
 \subsection*{UNet Techniques}
 % In the unet architecture, we use horizontal and vertical flipping, Kaiming weight initialization, cosine annealing, and add extra penalty to loss inversely proportional to the frequency of a given class pixel.
-

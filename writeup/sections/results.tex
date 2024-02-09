@@ -5,12 +5,22 @@
 % (a) A single plot showing both training and validation loss curves;
 % (b) Validation set pixel accuracy and average IoU.
 % (c) Visualizations of the segmented output for any one image in the test set along with the original image. Use the color coding mapping in the voc.py for this (Please refer to visualize.ipynb for help on plotting).
+
+\subsection{Baseline FCN}
+
+Our baseline FCN resulted in a 0.06 IOU and a 75\% pixel accuracy on the test set.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{plots/baseline}
 	\caption{Baseline Augmentation}
 	\label{fig:baseline}
 \end{figure}
+
+\subsection{FCN with augmentation}
+
+Our FCN with augmentation resulted in a 0.06 IOU and a 72\% pixel accuracy on the test set. We noticed that the loss convergence
+was slower.
 
 \begin{figure}[H]
 	\centering
@@ -19,12 +29,22 @@
 	\label{fig:baseline_aug}
 \end{figure}
 
+\subsection{FCN with Cosine Annealing LR}
+
+Our FCN with Cosine Annealing LR resulted in a 0.05 IOU and a 74\% pixel accuracy on the test set.
+
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{plots/baseline_cosine}
 	\caption{Baseline Cosine}
 	\label{fig:baseline_cos}
 \end{figure}
+
+\subsection{FCN with Custom Class Weights}
+
+
+Our FCN with custom class weights resulted in a slightly worse 0.04 IOU and a 67\% pixel accuracy on the test set.
 
 \begin{figure}[H]
 	\centering
@@ -33,12 +53,12 @@
 	\label{fig:baseline_weights}
 \end{figure}
 
-\begin{figure}[H]
-	\centering
-	\includegraphics[width=\textwidth]{plots/darrennet_augment_affine}
-	\caption{DarrenNet Augment Affine}
-	\label{fig:darren_aug_aff}
-\end{figure}
+\subsection{DarrenNet}
+
+TODO: darrennet no transfer!!
+
+In Figure \ref{fig:darren_transfer}, we observe the outcomes of DarrenNet with transfer learning using resnet34's encoder. The model leverages pre-trained weights, demonstrating superior performance on the test set. The transfer learning strategy significantly boosts both IOU (0.10) and accuracy (78\%), indicating that the network effectively transfers knowledge from the source domain to the target domain.
+
 
 \begin{figure}[H]
 	\centering
@@ -47,6 +67,9 @@
 	\label{fig:darren_transfer}
 \end{figure}
 
+
+Figure \ref{fig:darren_transfer_aug} represents the results of DarrenNet with both transfer learning and data augmentation. This combination appears to be highly effective, as the model achieves impressive segmentation results on the test set. The incorporation of augmented data during training, along with knowledge transfer, contributes to enhanced generalization capabilities.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{plots/darrennet_transfer_augment}
@@ -54,12 +77,26 @@
 	\label{fig:darren_transfer_aug}
 \end{figure}
 
+Figure \ref{fig:darren_aug_aff} displays the results of the DarrenNet with Augment Affine and transfer learning. The model exhibits strong performance on the test set, achieving a high Intersection over Union (IOU) at 0.15 and 82\% accuracy. The augmentation techniques, particularly affine transformations, seem to enhance the model's ability to generalize well to unseen data, resulting in improved segmentation accuracy.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{plots/darrennet_augment_affine}
+	\caption{DarrenNet Augment Affine}
+	\label{fig:darren_aug_aff}
+\end{figure}
+
+
+The UNet architecture's results are depicted in Figure \ref{fig:unet}. The model demonstrates below average segmentation performance, achieving poor IOU (0.05) and accuracy (0.55) on the test set.
+
 \begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{plots/unet}
 	\caption{UNet}
 	\label{fig:unet}
 \end{figure}
+
+In Figure \ref{fig:unet_transfer}, we observe the UNet with transfer learning. The model exhibits improved segmentation results compared to the non-transfer counterpart, showcasing the effectiveness of leveraging pre-trained weights. Transfer learning enhances the model's ability to understand and segment structures in the medical images, leading to higher IOU (0.08) and accuracy (79\%) on the test set.
 
 \begin{figure}[H]
 	\centering
