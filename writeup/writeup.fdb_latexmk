@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex writeup"] 1707457726 "writeup.aux" "writeup.bbl" "writeup" 1707457726 0
+["bibtex writeup"] 1707457844 "writeup.aux" "writeup.bbl" "writeup" 1707457846 0
   "./references.bib" 1707457073 1305 3acc4ac5a03391fc184687ee9894ebfe ""
   "/usr/local/texlive/2023/texmf-dist/bibtex/bst/natbib/plainnat.bst" 1233624470 26816 ffe5423d2019860bad9f54bc402fac15 ""
-  "writeup.aux" 1707457723 6170 8292df5ff88f8137dbb235cf18876299 "pdflatex"
+  "writeup.aux" 1707457846 6158 9062567af4721b0fcdb00e7a4c430b87 "pdflatex"
   (generated)
   "writeup.bbl"
   "writeup.blg"
   (rewritten before read)
-["pdflatex"] 1707457721 "writeup.tex" "writeup.pdf" "writeup" 1707457726 2
+["pdflatex"] 1707457844 "writeup.tex" "writeup.pdf" "writeup" 1707457846 0
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -154,10 +154,10 @@
   "sections/methods.tex" 1707457707 18382 d6404f04892c0ac4e5acbe435b89b43f ""
   "sections/related.tex" 1707427362 1702 ce80d364a837bc119e96f2f8ac2f9d71 ""
   "sections/results.tex" 1707457073 5344 7297855c0c2e4c8019ecea881df34c4b ""
-  "writeup.aux" 1707457723 6170 8292df5ff88f8137dbb235cf18876299 "pdflatex"
-  "writeup.bbl" 1707457726 902 659ea2651f234a14d76a68dc8d867be8 "bibtex writeup"
-  "writeup.out" 1707457722 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
-  "writeup.tex" 1707457707 1882 6c799d5d34ead301bd5d8441f5274571 ""
+  "writeup.aux" 1707457846 6158 9062567af4721b0fcdb00e7a4c430b87 "pdflatex"
+  "writeup.bbl" 1707457844 902 659ea2651f234a14d76a68dc8d867be8 "bibtex writeup"
+  "writeup.out" 1707457845 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "writeup.tex" 1707457817 1882 6c799d5d34ead301bd5d8441f5274571 ""
   (generated)
   "writeup.aux"
   "writeup.log"
