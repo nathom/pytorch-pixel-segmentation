@@ -6,7 +6,7 @@
 % (b) Validation set pixel accuracy and average IoU.
 % (c) Visualizations of the segmented output for any one image in the test set along with the original image. Use the color coding mapping in the voc.py for this (Please refer to visualize.ipynb for help on plotting).
 
-\subsection{Baseline FCN}
+\subsection*{Baseline FCN}
 
 Our baseline FCN resulted in a 0.06 IOU and a 75\% pixel accuracy on the test set.
 
@@ -17,7 +17,7 @@ Our baseline FCN resulted in a 0.06 IOU and a 75\% pixel accuracy on the test se
 	\label{fig:baseline}
 \end{figure}
 
-\subsection{FCN with augmentation}
+\subsection*{FCN with augmentation}
 
 Our FCN with augmentation resulted in a 0.06 IOU and a 72\% pixel accuracy on the test set. We noticed that the loss convergence
 was slower.
@@ -29,7 +29,7 @@ was slower.
 	\label{fig:baseline_aug}
 \end{figure}
 
-\subsection{FCN with Cosine Annealing LR}
+\subsection*{FCN with Cosine Annealing LR}
 
 Our FCN with Cosine Annealing LR resulted in a 0.05 IOU and a 74\% pixel accuracy on the test set.
 
@@ -41,7 +41,7 @@ Our FCN with Cosine Annealing LR resulted in a 0.05 IOU and a 74\% pixel accurac
 	\label{fig:baseline_cos}
 \end{figure}
 
-\subsection{FCN with Custom Class Weights}
+\subsection*{FCN with Custom Class Weights}
 
 
 Our FCN with custom class weights resulted in a slightly worse 0.04 IOU and a 67\% pixel accuracy on the test set.
@@ -53,9 +53,17 @@ Our FCN with custom class weights resulted in a slightly worse 0.04 IOU and a 67
 	\label{fig:baseline_weights}
 \end{figure}
 
-\subsection{DarrenNet}
+\subsection*{DarrenNet}
 
-TODO: darrennet no transfer!!
+In Figure \ref{fig:darren}, we observe the outcomes of DarrenNet. The model has a respectable IOU (0.05) and accuracy (75\%), while maintaining very fast training speeds.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{plots/darrennet}
+	\caption{DarrenNet}
+	\label{fig:darren}
+\end{figure}
+
 
 In Figure \ref{fig:darren_transfer}, we observe the outcomes of DarrenNet with transfer learning using resnet34's encoder. The model leverages pre-trained weights, demonstrating superior performance on the test set. The transfer learning strategy significantly boosts both IOU (0.10) and accuracy (78\%), indicating that the network effectively transfers knowledge from the source domain to the target domain.
 
@@ -103,4 +111,15 @@ In Figure \ref{fig:unet_transfer}, we observe the UNet with transfer learning. T
 	\includegraphics[width=\textwidth]{plots/unet_transfer}
 	\caption{UNet Transfer}
 	\label{fig:unet_transfer}
+\end{figure}
+
+
+We see the best results with DarrenNet that leverages pretrained ERFNet weights. Unet also
+gives decent results, at least when it comes to detecting humans \ref{fig:comparison}.
+
+\begin{figure}[H]
+	\centering
+	\includegraphics[width=\textwidth]{plots/comparison}
+	\caption{Comparison between models}
+	\label{fig:comparison}
 \end{figure}

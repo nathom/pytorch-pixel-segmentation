@@ -14,6 +14,7 @@ from torchvision.transforms import v2
 
 from . import theme
 from .basic_fcn import FCN
+from .darren import DarrenNet
 from .dataset import download_data, get_frequency_spectrum, load_dataset
 from .erfnet_imagenet import ERFNet
 from .train import model_test, model_train
@@ -185,12 +186,12 @@ def cook(
         pretrained_enc.load_state_dict(new_state_dict)
         pretrained_enc = next(pretrained_enc.children()).encoder
 
-        fcn_model = ERFNet(
+        fcn_model = DarrenNet(
             num_classes=n_class, input_channels=3, encoder=pretrained_enc
         )
         learning_rate = 5e-4
     elif erfnet:
-        fcn_model = ERFNet(num_classes=n_class, input_channels=3)
+        fcn_model = DarrenNet(num_classes=n_class, input_channels=3)
         learning_rate = 5e-4
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
