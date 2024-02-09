@@ -90,7 +90,7 @@ class UpsamplerBlock(nn.Module):
         return self.relu(output)
 
 
-class ERF(nn.Module):
+class DarrenNet(nn.Module):
     def __init__(
         self, num_classes: int, input_channels: int, encoder=None
     ):  # use encoder to pass pretrained encoder
