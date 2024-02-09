@@ -1,7 +1,7 @@
 \section*{Methods}
 % In the Methods section, you should describe the implementation and architectural details of your system - in particular, this addresses how you approached the problem and the design of your solution. For those who believe in reproducible science, this should be fine-grained enough such that somebody could implement your model/algorithm and reproduce the results you claim to achieve.
 
-\begin{figure}[htbp]
+\begin{figure}[H]
 	\centering
 	\includegraphics[width=\textwidth]{images/architecture}
 	\caption{Visualization of System Architecture}
@@ -36,86 +36,10 @@ To mitigate the challenges posed by class imbalance, particularly addressing rar
 \section*{Experimentation}
 
 % (c) Experimentation (10 pt): Describe your two experimental CNN architectures(parts 5.a and 5.b) and the U-Net, each in a table, which the first column indicate the particular layer of your network, and the other columns state the layer’s dimensions (e.g. in-channels, out-channels, kernel-size, padding/stride) and activation function/non-linearity. Describe any regularization techniques (e.g. data augmentation) you used, parameter initialization methods, gradient descent optimization, and how you addressed the class-imbalance problem .
-\subsection*{DarrenNet}
-\begin{table}[htbp]
-	\centering
-	\label{tab:example}
-	\setlength{\abovecaptionskip}{10pt}
-	\begin{tabular}{|c|c|c|c|c|c|c|}
-		\hline
-		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
-		Layer 1        & -           & 64           & 0                & 3x3             & 1               & ReLU                \\ \hline
-		Layer 2        & 64          & 128          & 1                & 3x3             & 2               & ReLU                \\ \hline
-		Layer 3        & 128         & 128          & 0                & 3x3             & 1               & ReLU                \\ \hline
-	\end{tabular}
-	\caption{DarrenNet Architecture}
-\end{table}
+Below are the descriptions (in table format) and regularization techniques used for each architecture.
 
-\begin{table}[ht]
-	\setlength{\abovecaptionskip}{10pt}
-	\centering
-	\begin{tabular}{|l|c|c|c|c|c|c|}
-		\hline
-		\textbf{Layer Name} & \textbf{In}          & \textbf{Out}         & \textbf{Padding}      & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
-		\hline
-		conv3x1\_1          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1, 0)                & (3, 1)               & 1               & ReLU                \\
-		\hline
-		conv1x3\_1          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1)                & (1, 3)               & 1               & ReLU                \\
-		\hline
-		conv3x1\_2          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1$\times$dilated, 0) & (3, 1)               & 1               & ReLU                \\
-		\hline
-		conv1x3\_2          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1$\times$dilated) & (1, 3)               & 1               & ReLU                \\
-		\hline
-		bn1                 &                      &                      &                       &                      &                 &                     \\
-		\hline
-		bn2                 &                      &                      &                       &                      &                 &                     \\
-		\hline
-		relu                &                      &                      &                       &                      &                 & Inplace             \\
-		\hline
-		dropout             &                      &                      &                       &                      &                 & 2D                  \\
-		\hline
-	\end{tabular}
-	\caption{Non-bottleneck}
-\end{table}
-
-\begin{table}[htbp]
-	\setlength{\abovecaptionskip}{10pt}
-	\centering
-	\begin{tabular}{|l|c|c|c|c|c|c|}
-		\hline
-		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}                                 & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
-		\hline
-		conv                & $in_{\text{channel}}$  & $out_{\text{channel}} - in_{\text{channel}}$ & (1, 1)           & (3, 3)               & 2               & -                   \\
-		\hline
-		pool                & -                      & -                                            & -                & (2, 2)               & 2               & -                   \\
-		\hline
-		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$                       & -                & -                    & -               & -                   \\
-		\hline
-		relu                & -                      & -                                            & -                & -                    & -               & Inplace             \\
-		\hline
-	\end{tabular}
-	\caption{DownsamplerBlock}
-\end{table}
-
-\begin{table}[htbp]
-	\setlength{\abovecaptionskip}{10pt}
-	\centering
-	\begin{tabular}{|l|c|c|c|c|c|c|}
-		\hline
-		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}           & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
-		\hline
-		conv                & $in_{\text{channel}}$  & $out_{\text{channel}}$ & (1, 1)           & (3, 3)               & 2               & -                   \\
-		\hline
-		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$ & -                & -                    & -               & -                   \\
-		\hline
-		relu                & -                      & -                      & -                & -                    & -               & Inplace             \\
-		\hline
-	\end{tabular}
-	\caption{UpsamplerBlock}
-\end{table}
-
-\subsection*{DarrenYuNet}
-\begin{table}[htbp]
+\subsection*{DarrenNet Architecture}
+\begin{table}[H]
 	\centering
 	\label{tab:darrenyu}
 	\setlength{\abovecaptionskip}{10pt}
@@ -146,11 +70,93 @@ To mitigate the challenges posed by class imbalance, particularly addressing rar
 		Non-bottleneck 17 & 16          & 16           & 0                & 3x3             & 1               & ReLU                \\ \hline
 		Output Conv       & 16          & 21           & 0                & 2x2             & 2               & -                   \\ \hline
 	\end{tabular}
-	\caption{DarrenUNet Architecture}
+	\caption{DarrenNet Architecture}
 \end{table}
 
-\subsection*{UNet}
-\begin{table}[htbp]
+\begin{table}[H]
+	\setlength{\abovecaptionskip}{10pt}
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer Name} & \textbf{In}          & \textbf{Out}         & \textbf{Padding}      & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
+		\hline
+		conv1          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1, 0)                & 3x1               & 1               & ReLU                \\
+		\hline
+		conv2          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1)                & 1x3               & 1               & ReLU                \\
+		\hline
+		conv3          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (1$\times$dilated, 0) & 3x1               & 1               & ReLU                \\
+		\hline
+		conv4          & $n_{\text{channel}}$ & $n_{\text{channel}}$ & (0, 1$\times$dilated) & 1x3               & 1               & ReLU                \\
+		\hline
+		bn1                 &                      &                      &                       &                      &                 &                     \\
+		\hline
+		bn2                 &                      &                      &                       &                      &                 &                     \\
+		\hline
+		dropout             &                      &                      &                       &                      &                 & 2D                  \\
+		\hline
+	\end{tabular}
+	\caption{Non-bottleneck (DarrenNet)}
+\end{table}
+
+\begin{table}[H]
+	\setlength{\abovecaptionskip}{10pt}
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}                                 & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
+		\hline
+		conv                & $in_{\text{channel}}$  & $out_{\text{channel}} - in_{\text{channel}}$ & 1           & 3x3               & 2               &                    \\
+		\hline
+		pool                &                       &                                             &                 & 2x2               & 2               &                    \\
+		\hline
+		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$                       &                 &                     &                &                    \\
+		\hline
+	\end{tabular}
+	\caption{DownsamplerBlock (DarrenNet)}
+\end{table}
+
+\begin{table}[H]
+	\setlength{\abovecaptionskip}{10pt}
+	\centering
+	\begin{tabular}{|l|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer Name} & \textbf{In}            & \textbf{Out}           & \textbf{Padding} & \textbf{Kernel Size} & \textbf{Stride} & \textbf{Activation} \\
+		\hline
+		conv                & $in_{\text{channel}}$  & $out_{\text{channel}}$ & (1, 1)           & 3x3               & 2               &                    \\
+		\hline
+		bn                  & $out_{\text{channel}}$ & $out_{\text{channel}}$ &                 &                     &                &                    \\
+		\hline
+	\end{tabular}
+	\caption{UpsamplerBlock (DarrenNet)}
+\end{table}
+
+\subsection*{DarrenNet Techniques}
+In our DarrenNet architecture, we use horizontal and vertical flipping, Kaiming weight initialization, cosine annealing, and add extra penalty to loss inversely proportional to the frequency of a given class pixel.
+
+\subsection*{Transfer Learning Architecture}
+\begin{table}[H]
+	\centering
+	\label{tab:transfer}
+	\setlength{\abovecaptionskip}{10pt}
+	\begin{tabular}{|c|c|c|c|c|c|c|}
+		\hline
+		\textbf{Layer} & \textbf{In} & \textbf{Out} & \textbf{Padding} & \textbf{Kernel} & \textbf{Stride} & \textbf{Activation} \\ \hline
+		encoder          &            &            &                 &              &                &                 \\ \hline
+		deconv1        & 512         & 256           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		deconv1        & 512         & 256           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		deconv2        & 256         & 128           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		deconv3        & 128         & 64           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		deconv4        & 64         & 32           & 1                & 3x3             & 2               & ReLU                \\ \hline
+		conv        & 32         & 21           & 1                & 3x3             & 2               & Softmax                \\ \hline
+	\end{tabular}
+	\caption{Transfered Encoder to Basic FCN Architecture}
+\end{table}
+
+\subsection*{Transfer Learning Techniques}
+% In transfer learning, we use horizontal and vertical flipping, Kaiming weight initialization, cosine annealing, and add extra penalty to loss inversely proportional to the frequency of a given class pixel.
+
+\subsection*{UNet Architecture}
+\begin{table}[H]
 	\centering
 	\label{tab:unet}
 	\setlength{\abovecaptionskip}{10pt}
@@ -187,4 +193,7 @@ To mitigate the challenges posed by class imbalance, particularly addressing rar
 	\end{tabular}
 	\caption{UNet Architecture}
 \end{table}
+
+\subsection*{UNet Techniques}
+% In the unet architecture, we use horizontal and vertical flipping, Kaiming weight initialization, cosine annealing, and add extra penalty to loss inversely proportional to the frequency of a given class pixel.
 
