@@ -2,6 +2,7 @@ import json
 import os
 
 import click
+import matplotlib.pyplot as plt
 import numpy as np
 import segmentation_models_pytorch as smp
 import torch
@@ -190,9 +191,9 @@ def cook(
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
         fcn_model = smp.create_model("unet", classes=21)
-        learning_rate = 1e-3
+        learning_rate = 5e-4
     elif smp_module == "unet":
-        theme.print("Using smp UNet++")
+        theme.print("Using smp UNet")
         fcn_model = smp.create_model("unetplusplus", classes=21)
         learning_rate = 1e-3
     elif smp_module == "linknet":
@@ -353,10 +354,10 @@ def cook(
                 )
 
 
-@click.option("-l", "--load", help="Loads cached model.")
 @click.option("-d", "--display", is_flag=True)
-@click.option("-i", "--img", type=str)
 @click.option("-c", "--compare")
+@click.option("-i", "--img", type=str)
+@click.option("-l", "--load", help="Loads cached model.")
 @main.command(cls=HelpColorsCommand)
 def insight(load, display, compare, img):
     """Run inference on the model."""
@@ -420,6 +421,83 @@ def insight(load, display, compare, img):
             compare_images(files, int(compare), 1, inputs)
         else:
             compare_images(files, int(compare), 1)
+
+
+@click.option("-l", "--load", help="Loads cached model.")
+@main.command(cls=HelpColorsCommand)
+def plot(
+    load,
+):
+    path = os.path.join(models_dir, load + ".json")
+    with open(path) as f:
+        info = json.load(f)
+
+    plot_training_metrics(
+        info["training_loss"],
+        info["loss"],
+        len(info["loss"]) - 1,
+        info["ious"],
+        info["accs"],
+    )
+    # {
+    #     "learning_rate": learning_rate,
+    #     "augment": augment,
+    #     "erfnet": erfnet_pretrained,
+    #     "save": save,
+    #     "unet": unet,
+    #     "unet_resnet": unet_resnet,
+    #     "smp_module": smp_module,
+    #     "no_cosine": no_cosine,
+    #     "epochs": epochs,
+    #     "loss": validation_losses,
+    #     "training_loss": training_losses,
+    #     "ious": validation_ious,
+    #     "accs": validation_accs,
+    # },
+
+
+def plot_training_metrics(
+    loss_train, loss_val, early_stop_epoch, iou_val, accuracy_val
+):
+    # Create a figure and subplots
+    fig, axs = plt.subplots(1, 3, figsize=(10, 3))
+
+    epoch_range = np.linspace(0, len(loss_val), len(loss_train))
+    # Plot Training and Validation Loss with Early Stop Indicator
+    axs[0].plot(epoch_range, loss_train, label="Training Loss", color="blue")
+    axs[0].plot(
+        range(1, len(loss_val) + 1), loss_val, label="Validation Loss", color="orange"
+    )
+    axs[0].axvline(
+        x=early_stop_epoch + 1, color="red", linestyle="--", label="Early Stop"
+    )
+    axs[0].scatter(
+        early_stop_epoch, loss_val[early_stop_epoch], color="red", marker="x"
+    )
+    axs[0].set_title("Training and Validation Loss")
+    axs[0].set_xlabel("Epochs")
+    axs[0].set_ylabel("Loss")
+    axs[0].legend()
+
+    # Plot Validation IOU
+    axs[1].plot(iou_val, label="Validation IOU", color="green")
+    axs[1].set_title("Validation IOU")
+    axs[1].set_xlabel("Epochs")
+    axs[1].set_ylabel("IOU")
+    axs[1].legend()
+
+    # Plot Validation Accuracy
+    axs[2].plot(accuracy_val, label="Validation Accuracy", color="purple")
+    axs[2].set_title("Validation Accuracy")
+    axs[2].set_xlabel("Epochs")
+    axs[2].set_ylabel("Accuracy")
+    axs[2].legend()
+
+    # Adjust layout to avoid overlap
+    plt.tight_layout()
+
+    # Show the plot
+    plt.show()
 
 
 def get_augment_transforms(augment: str | None):
