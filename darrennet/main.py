@@ -189,6 +189,11 @@ def cook(
         learning_rate = 5e-4
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
+        fcn_model = smp.create_model("unet", classes=21)
+        learning_rate = 1e-3
+    elif smp_module == "unet":
+        theme.print("Using smp UNet++")
+        fcn_model = smp.create_model("unetplusplus", classes=21)
         learning_rate = 1e-3
     elif smp_module == "linknet":
         theme.print("Using smp LinkNet")
@@ -240,7 +245,6 @@ def cook(
                 31.31266311222871,
             ]
         ).to(device)
-        learning_rate = 1e-2
     else:
         weights = None
 
