@@ -2,7 +2,6 @@ import json
 import os
 
 import click
-import matplotlib.pyplot as plt
 import numpy as np
 import segmentation_models_pytorch as smp
 import torch
@@ -109,6 +108,7 @@ def validate_filepath_exists(ctx, param, value):
 @click.option("-a", "--augment", help="Choose <=4 from {a,v,h,r}")
 @click.option("-e", "--erfnet", help="Use ERFNet", is_flag=True)
 @click.option("-ep", "--erfnet-pretrained", help="Use ERFNet pretrained", is_flag=True)
+@click.option("-fp", "--fcn-pretrained", help="Use FCN pretrained", is_flag=True)
 @click.option("-u", "--unet", help="Use UNet", is_flag=True)
 @click.option(
     "-smp",
@@ -117,6 +117,7 @@ def validate_filepath_exists(ctx, param, value):
     type=str,
 )
 @click.option("-nc", "--no-cosine", help="Don't use cosine LR", is_flag=True)
+@click.option("-nw", "--no-weights", help="Don't weighting for classes", is_flag=True)
 @click.option(
     "-ur",
     "--unet-resnet",
@@ -153,7 +154,9 @@ def cook(
     unet_resnet,
     smp_module,
     no_cosine,
+    no_weights,
     epochs,
+    fcn_pretrained,
     dice,
     patience,
 ):
@@ -199,39 +202,47 @@ def cook(
         theme.print("using UNet with pretrained ResNet backbone")
         fcn_model = UNetResnet(n_class)
         learning_rate = 1e-3
+    elif fcn_pretrained:
+        theme.print("Using FCN with resnet backbone")
+        fcn_model = FCN(n_class=n_class, resnet_backbone=True)
+        learning_rate = 0.001
     else:
         theme.print("Using FCN")
         fcn_model = FCN(n_class=n_class)
         fcn_model.apply(init_weights)
         learning_rate = 0.001
 
-    theme.print("Weighting loss by inverse class frequency")
     # calculated with dataset:get_freqency_spectrum
-    weights = torch.Tensor(
-        [
-            1.7765756464776548,
-            41.14605024958389,
-            41.923407019122614,
-            35.610010988370455,
-            41.358926183434754,
-            37.852584879629106,
-            26.134633569759732,
-            37.38219759224805,
-            26.90527861619218,
-            33.178439919075075,
-            36.909468575338494,
-            31.208512027144945,
-            30.14330606533797,
-            35.96210892771767,
-            36.792639486832435,
-            9.879025266255747,
-            43.95102624926591,
-            45.53468859040118,
-            28.199209349833556,
-            32.31202739148328,
-            31.31266311222871,
-        ]
-    ).to(device)
+    if not no_weights:
+        theme.print("Weighting loss by inverse class frequency")
+        weights = torch.Tensor(
+            [
+                1.7765756464776548,
+                41.14605024958389,
+                41.923407019122614,
+                35.610010988370455,
+                41.358926183434754,
+                37.852584879629106,
+                26.134633569759732,
+                37.38219759224805,
+                26.90527861619218,
+                33.178439919075075,
+                36.909468575338494,
+                31.208512027144945,
+                30.14330606533797,
+                35.96210892771767,
+                36.792639486832435,
+                9.879025266255747,
+                43.95102624926591,
+                45.53468859040118,
+                28.199209349833556,
+                32.31202739148328,
+                31.31266311222871,
+            ]
+        ).to(device)
+        learning_rate = 1e-2
+    else:
+        weights = None
 
     augment_transform = get_augment_transforms(augment)
     optimizer = torch.optim.Adam(params=fcn_model.parameters(), lr=learning_rate)
@@ -302,14 +313,6 @@ def cook(
             patience,
         )
 
-        plt.plot(training_losses)
-        plt.plot(validation_losses)
-        plt.title("Train and Valid Set Loss")
-        plt.xlabel("Epoch")
-        plt.ylabel("Loss")
-        plt.legend()
-        plt.show()
-
         theme.print("Testing network...")
         model_test(
             fcn_model,
@@ -352,24 +355,12 @@ def cook(
 @click.option("-c", "--compare")
 @main.command(cls=HelpColorsCommand)
 def insight(load, display, compare, img):
-    if compare:
-        files = []
-        for file in os.listdir(os.getcwd() + "/models"):
-            if file.endswith(".pkl"):
-                files.append(file)
-        compare_images(files, int(compare), 1)
-        return
-
     """Run inference on the model."""
-    path = os.path.join(models_dir, load + ".pkl")
-    model = torch.load(path)
 
-    theme.print("Loading network and running inference...")
-    device = find_device()
-    criterion = torch.nn.CrossEntropyLoss()
     mean, std = [0.485, 0.456, 0.406], [0.229, 0.224, 0.225]
     inverse_normalize = v2.Normalize(
-        mean=[-mean[i] / std[i] for i in range(3)], std=[1 / std[i] for i in range(3)]
+        mean=[-mean[i] / std[i] for i in range(3)],
+        std=[1 / std[i] for i in range(3)],
     )
     input_transform = v2.Compose(
         [
@@ -380,9 +371,18 @@ def insight(load, display, compare, img):
         ]
     )
 
-    train_loader, _, test_loader = load_dataset(None, input_transform, MaskToTensor())
+    if load is not None:
+        path = os.path.join(models_dir, load + ".pkl")
+        model = torch.load(path)
 
-    model_test(model, criterion, test_loader, device)
+        theme.print("Loading network and running inference...")
+        device = find_device()
+        criterion = torch.nn.CrossEntropyLoss()
+        train_loader, _, test_loader = load_dataset(
+            None, input_transform, MaskToTensor()
+        )
+
+        model_test(model, criterion, test_loader, device)
 
     if display:
         if img is not None:
@@ -402,6 +402,20 @@ def insight(load, display, compare, img):
             outputs = model(inputs.to(device)).cpu().detach().numpy()
             outputs = np.argmax(outputs, axis=1).astype(np.uint8)
             display_images(inputs2.cpu(), outputs)
+
+    if compare:
+        files = []
+        for file in os.listdir(os.getcwd() + "/models"):
+            if file.endswith(".pkl"):
+                files.append(file)
+        if img is not None:
+            theme.print(f"Showing custom image {img}")
+            img_obj = Image.open(img).convert("RGB").resize((224, 224))
+            inputs = input_transform(img_obj)
+            inputs = inputs.unsqueeze(0)
+            compare_images(files, int(compare), 1, inputs)
+        else:
+            compare_images(files, int(compare), 1)
 
 
 def get_augment_transforms(augment: str | None):
