@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex writeup"] 1707449488.3055 "writeup.aux" "writeup.bbl" "writeup" 1707449494.56656 0
+["bibtex writeup"] 1707449685.12055 "writeup.aux" "writeup.bbl" "writeup" 1707451805.7021 0
   "C:/Users/Darren Yu/AppData/Local/Programs/MiKTeX1/bibtex/bib/feupphdteses/references.bib" 1366811700 2206 985e03fb36d872d306e76cfacc160693 ""
   "C:/Users/Darren Yu/AppData/Local/Programs/MiKTeX1/bibtex/bst/natbib/plainnat.bst" 1284455456 26816 ffe5423d2019860bad9f54bc402fac15 ""
-  "writeup.aux" 1707449492 1918 4be8de176e63344a95bd985ec25f9eb7 "pdflatex"
+  "writeup.aux" 1707451804 4423 55c3daae6e546bdc378c965f0a946bc6 "pdflatex"
   (generated)
   "writeup.bbl"
   "writeup.blg"
   (rewritten before read)
-["pdflatex"] 1707449489.11235 "c:/Users/Darren Yu/OneDrive/Documents/GitHub/cse151b251b-wi24-pa2-darrennet/writeup/writeup.tex" "writeup.pdf" "writeup" 1707449494.56825 0
+["pdflatex"] 1707451802.23954 "c:/Users/Darren Yu/OneDrive/Documents/GitHub/cse151b251b-wi24-pa2-darrennet/writeup/writeup.tex" "writeup.pdf" "writeup" 1707451805.70309 0
   "C:/Users/Darren Yu/AppData/Local/MiKTeX/fonts/map/pdftex/pdftex.map" 1707371383 80909 eab91d9745dd2edfd62a31d53cd5fe15 ""
   "C:/Users/Darren Yu/AppData/Local/MiKTeX/fonts/pk/ljfour/jknappen/ec/dpi600/ectt1000.pk" 1707373016 20028 74b6ee6ff6e13b2eb273198c9fcbe902 ""
   "C:/Users/Darren Yu/AppData/Local/MiKTeX/fonts/tfm/public/amsfonts/cmex7.tfm" 1707372988 940 f9e66c0105a30e64e3a0f5c4f79efb8d ""
@@ -132,16 +132,25 @@
   "c:/Users/Darren Yu/OneDrive/Documents/GitHub/cse151b251b-wi24-pa2-darrennet/writeup/writeup.tex" 1707428866 1956 7c77d38a86123cd4855a5f600d6a0d20 ""
   "images/architecture.png" 1707449132 199621 9fbbe163cbab2c21aab4739e3c803056 ""
   "neurips_2023.sty" 1706659162 11801 e7b1d28b625442ee69f3e0509f97aaad ""
+  "plots/baseline.png" 1707449132 54751 ee93f0f2225e435a3bc497d61794b74c ""
+  "plots/baseline_augmentation.png" 1707449132 53981 158461ff3ff326b7f1ba0992b601b64f ""
+  "plots/baseline_cosine.png" 1707449132 54585 290275bdc9af9b646e09f56c4cfc173b ""
+  "plots/baseline_weights.png" 1707449132 52123 670005fb9e54abf708b95e2c084992d0 ""
+  "plots/darrennet_augment_affine.png" 1707449132 68691 3df82fdcb385da2f793585374ab98cae ""
+  "plots/darrennet_transfer.png" 1707449132 57229 0607317b54bc29f95f527eb1c2342337 ""
+  "plots/darrennet_transfer_augment.png" 1707449132 61097 aab2d9c5a316839c2564e1acf1cc2001 ""
+  "plots/unet.png" 1707449564 64614 51f37abb41781471a71bf14eb9c7aa0a ""
+  "plots/unet_transfer.png" 1707449564 51877 31ed2955d0f87ca920a57a8aaba0f3be ""
   "sections/abstract.tex" 1707427378 885 de31c17f26442d5d492f2c62da921885 ""
-  "sections/contributions.tex" 1707449132 490 8531a7e2276b90e8d97d826c5e2a2e61 ""
-  "sections/discussion.tex" 1707449132 1160 e6c7e12732d42686bb96bac3f2300388 ""
+  "sections/contributions.tex" 1707451385 556 7adc6b81d6e8b96fce7f2f15d8440626 ""
+  "sections/discussion.tex" 1707450131 1160 e6c7e12732d42686bb96bac3f2300388 ""
   "sections/intro.tex" 1707449132 5777 e6c94fcfe46e313eb973a7ab44a95aec ""
-  "sections/methods.tex" 1707449483 17212 f2d272f42db20053a040f204acdb90e6 ""
+  "sections/methods.tex" 1707451801 17627 6979c03593dcfe02bae453c569e37a0c ""
   "sections/related.tex" 1707428866 1717 ce80d364a837bc119e96f2f8ac2f9d71 ""
-  "sections/results.tex" 1707449132 809 aa3b111285aab5df7b86f5f5c216d6c0 ""
-  "writeup.aux" 1707449492 1918 4be8de176e63344a95bd985ec25f9eb7 "pdflatex"
-  "writeup.bbl" 1707449488 283 de5ffaf5b665b622658d80bed97ba2a5 "bibtex writeup"
-  "writeup.out" 1707449491 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
+  "sections/results.tex" 1707449564 2312 5d47168e375c18e086811b735395ce29 ""
+  "writeup.aux" 1707451804 4423 55c3daae6e546bdc378c965f0a946bc6 "pdflatex"
+  "writeup.bbl" 1707449685 283 de5ffaf5b665b622658d80bed97ba2a5 "bibtex writeup"
+  "writeup.out" 1707451803 0 d41d8cd98f00b204e9800998ecf8427e "pdflatex"
   "writeup.tex" 1707428866 1956 7c77d38a86123cd4855a5f600d6a0d20 ""
   (generated)
   "writeup.aux"
