@@ -1,8 +1,20 @@
-\begin{thebibliography}{0}
+\begin{thebibliography}{3}
 \providecommand{\natexlab}[1]{#1}
 \providecommand{\url}[1]{\texttt{#1}}
 \expandafter\ifx\csname urlstyle\endcsname\relax
   \providecommand{\doi}[1]{doi: #1}\else
   \providecommand{\doi}{doi: \begingroup \urlstyle{rm}\Url}\fi
+
+\bibitem[He et~al.(2015)He, Zhang, Ren, and Sun]{resnet}
+Kaiming He, Xiangyu Zhang, Shaoqing Ren, and Jian Sun.
+\newblock Deep residual learning for image recognition, 2015.
+
+\bibitem[Romera et~al.(2018)Romera, Álvarez, Bergasa, and Arroyo]{erfnet}
+Eduardo Romera, José~M. Álvarez, Luis~M. Bergasa, and Roberto Arroyo.
+\newblock Erfnet: Efficient residual factorized convnet for real-time semantic segmentation, 2018.
+
+\bibitem[Ronneberger et~al.(2015)Ronneberger, Fischer, and Brox]{unet}
+Olaf Ronneberger, Philipp Fischer, and Thomas Brox.
+\newblock U-net: Convolutional networks for biomedical image segmentation, 2015.
 
 \end{thebibliography}
