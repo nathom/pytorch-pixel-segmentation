@@ -35,7 +35,8 @@ class MaskToTensor(object):
 
 def init_weights(model):
     if isinstance(model, nn.Conv2d) or isinstance(model, nn.ConvTranspose2d):
-        torch.nn.init.xavier_uniform_(model.weight.data)
+        # torch.nn.init.xavier_uniform_(model.weight.data)
+        torch.nn.init.kaiming_uniform_(model.weight.data, mode='fan_in', nonlinearity='relu')
         assert model.bias is not None
         torch.nn.init.normal_(model.bias.data)  # xavier not applicable for biases
 
