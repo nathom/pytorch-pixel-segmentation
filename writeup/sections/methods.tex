@@ -155,7 +155,7 @@ In our DarrenNet architecture, we use horizontal and vertical flipping, Kaiming 
 \end{table}
 
 \subsection*{Transfer Learning Techniques}
-% In transfer learning, we use horizontal and vertical flipping, Kaiming weight initialization, cosine annealing, and add extra penalty to loss inversely proportional to the frequency of a given class pixel.
+For transfer learning, we used Kaiming weight initialization, cosine annealing, and inverse weight decay. No data augmentation was done on the training set because of the simplicity of the model.
 
 \subsection*{UNet Architecture}
 \begin{table}[H]
@@ -198,3 +198,4 @@ In our DarrenNet architecture, we use horizontal and vertical flipping, Kaiming 
 
 \subsection*{UNet Techniques}
 % In the unet architecture, we use horizontal and vertical flipping, Kaiming weight initialization, cosine annealing, and add extra penalty to loss inversely proportional to the frequency of a given class pixel.
+The following techiques were used on UNet: Kaiming weight initialization, frequency weight penalty, cosine annealing, and vertical/horizontal augmentation.

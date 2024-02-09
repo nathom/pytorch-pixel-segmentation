@@ -228,7 +228,8 @@ def compare_images(model_paths, img_idx=0, img_cnt=1, sample_image=None):
         next(first_batch)
 
     # Create models here
-    models = [torch.load(os.path.join("models/" + m)) for m in model_paths]
+    #models = [torch.load(os.path.join("models/" + m)) for m in model_paths]
+    models = [torch.load(os.path.join("models/unet.pkl"))]
     model_cnt = len(models) + 1
     device = torch.device("cuda" if torch.cuda.is_available() else "cpu")
 
