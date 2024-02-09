@@ -161,19 +161,9 @@ cython_debug/
 
 # PA1 ignore files
 data/
-plots/
 .DS_Store
 darrennet/.DS_Store
 
-writeup/*
-!writeup/*.tex
-!writeup/*.sty
-!writeup/sections/
-!writeup/sections/*.tex
-!writeup/images/
-!writeup/images/*.png
-!writeup/images/*.jpg
-!writeup/images/*.jpeg
 models/
 
 # Ignore file that trains with cuda
