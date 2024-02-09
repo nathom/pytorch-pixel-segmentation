@@ -1,7 +1,7 @@
 import json
 import matplotlib.pyplot as plt
 
-file = json.load(open('./models/earth.json'))
+file = json.load(open('./models/earth_aug_4.json'))
 
 print(file.keys())
 
