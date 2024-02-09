@@ -8,7 +8,7 @@
 
 \subsection*{Baseline FCN}
 
-Our baseline FCN resulted in a 0.06 IOU and a 75\% pixel accuracy on the test set.
+On the validation set, the baseline had an average IOU of 0.08 and 77\% pixel accuracy. Our baseline FCN resulted in a 0.06 IOU and a 75\% pixel accuracy on the test set.
 
 \begin{figure}[H]
 	\centering
@@ -19,7 +19,7 @@ Our baseline FCN resulted in a 0.06 IOU and a 75\% pixel accuracy on the test se
 
 \subsection*{FCN with augmentation}
 
-Our FCN with augmentation resulted in a 0.06 IOU and a 72\% pixel accuracy on the test set. We noticed that the loss convergence
+The average IOU and pixel accuracy for the validation set were 0.07 and 74\%. Our FCN with augmentation resulted in a 0.06 IOU and a 72\% pixel accuracy on the test set. We noticed that the loss convergence
 was slower.
 
 \begin{figure}[H]
@@ -31,7 +31,7 @@ was slower.
 
 \subsection*{FCN with Cosine Annealing LR}
 
-Our FCN with Cosine Annealing LR resulted in a 0.05 IOU and a 74\% pixel accuracy on the test set.
+The validation set resulted in an average IOU of 0.06 and a pixel accuracy of 75\%. Our FCN with Cosine Annealing LR resulted in a 0.05 IOU and a 74\% pixel accuracy on the test set.
 
 
 \begin{figure}[H]
@@ -44,7 +44,7 @@ Our FCN with Cosine Annealing LR resulted in a 0.05 IOU and a 74\% pixel accurac
 \subsection*{FCN with Custom Class Weights}
 
 
-Our FCN with custom class weights resulted in a slightly worse 0.04 IOU and a 67\% pixel accuracy on the test set.
+From the validation set, the average IOU and pixel accuracy were 0.05 and 69\%. Our FCN with custom class weights resulted in a slightly worse 0.04 IOU and a 67\% pixel accuracy on the test set.
 
 \begin{figure}[H]
 	\centering
@@ -55,7 +55,7 @@ Our FCN with custom class weights resulted in a slightly worse 0.04 IOU and a 67
 
 \subsection*{DarrenNet}
 
-In Figure \ref{fig:darren}, we observe the outcomes of DarrenNet. The model has a respectable IOU (0.05) and accuracy (75\%), while maintaining very fast training speeds.
+In Figure \ref{fig:darren}, we observe the outcomes of DarrenNet. Validation set results were an IOU of 0.07 and a pixel accuracy of 77\% The model has a respectable IOU (0.05) and accuracy (75\%), while maintaining very fast training speeds.
 
 \begin{figure}[H]
 	\centering
@@ -65,7 +65,7 @@ In Figure \ref{fig:darren}, we observe the outcomes of DarrenNet. The model has 
 \end{figure}
 
 
-In Figure \ref{fig:darren_transfer}, we observe the outcomes of DarrenNet with transfer learning using resnet34's encoder. The model leverages pre-trained weights, demonstrating superior performance on the test set. The transfer learning strategy significantly boosts both IOU (0.10) and accuracy (78\%), indicating that the network effectively transfers knowledge from the source domain to the target domain.
+In Figure \ref{fig:darren_transfer}, we observe the outcomes of DarrenNet with transfer learning using resnet34's encoder. The model leverages pre-trained weights, demonstrating superior performance on the test set. The average IOU and pixel accuracy for the validation set were 0.12 and 78\%. The transfer learning strategy significantly boosts both IOU (0.10) and accuracy (78\%), indicating that the network effectively transfers knowledge from the source domain to the target domain.
 
 
 \begin{figure}[H]
@@ -85,7 +85,7 @@ Figure \ref{fig:darren_transfer_aug} represents the results of DarrenNet with bo
 	\label{fig:darren_transfer_aug}
 \end{figure}
 
-Figure \ref{fig:darren_aug_aff} displays the results of the DarrenNet with Augment Affine and transfer learning. The model exhibits strong performance on the test set, achieving a high Intersection over Union (IOU) at 0.15 and 82\% accuracy. The augmentation techniques, particularly affine transformations, seem to enhance the model's ability to generalize well to unseen data, resulting in improved segmentation accuracy.
+Figure \ref{fig:darren_aug_aff} displays the results of the DarrenNet with Augment Affine and transfer learning. Validation set had the following metrics: average IOU of 0.18 and pixel accuracy of 81\%. The model exhibits strong performance on the test set, achieving a high Intersection over Union (IOU) at 0.15 and 82\% accuracy. The augmentation techniques, particularly affine transformations, seem to enhance the model's ability to generalize well to unseen data, resulting in improved segmentation accuracy.
 
 \begin{figure}[H]
 	\centering
@@ -95,7 +95,7 @@ Figure \ref{fig:darren_aug_aff} displays the results of the DarrenNet with Augme
 \end{figure}
 
 
-The UNet architecture's results are depicted in Figure \ref{fig:unet}. The model demonstrates below average segmentation performance, achieving poor IOU (0.05) and accuracy (0.55) on the test set.
+The UNet architecture's results are depicted in Figure \ref{fig:unet}. The validation set had an IOU of 0.08 and pixel accuracy of 0.63\% The model demonstrates below average segmentation performance, achieving poor IOU (0.05) and accuracy (0.55) on the test set.
 
 \begin{figure}[H]
 	\centering
@@ -104,7 +104,7 @@ The UNet architecture's results are depicted in Figure \ref{fig:unet}. The model
 	\label{fig:unet}
 \end{figure}
 
-In Figure \ref{fig:unet_transfer}, we observe the UNet with transfer learning. The model exhibits improved segmentation results compared to the non-transfer counterpart, showcasing the effectiveness of leveraging pre-trained weights. Transfer learning enhances the model's ability to understand and segment structures in the medical images, leading to higher IOU (0.08) and accuracy (79\%) on the test set.
+In Figure \ref{fig:unet_transfer}, we observe the UNet with transfer learning. The model exhibits improved segmentation results compared to the non-transfer counterpart, showcasing the effectiveness of leveraging pre-trained weights. The average pixel accuracy and IOU from the validation set were 0.1 and 77\% Transfer learning enhances the model's ability to understand and segment structures in the medical images, leading to higher IOU (0.08) and accuracy (79\%) on the test set.
 
 \begin{figure}[H]
 	\centering
