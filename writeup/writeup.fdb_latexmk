@@ -1,13 +1,13 @@
 # Fdb version 4
-["bibtex writeup"] 1707450611 "writeup.aux" "writeup.bbl" "writeup" 1707450690 0
+["bibtex writeup"] 1707452169 "writeup.aux" "writeup.bbl" "writeup" 1707452169 0
   "/usr/local/texlive/2023/texmf-dist/bibtex/bst/natbib/plainnat.bst" 1233624470 26816 ffe5423d2019860bad9f54bc402fac15 ""
   "references.bib" 0 -1 0 ""
-  "writeup.aux" 1707450690 6053 75c2a99df47f8ddf92b6031585543617 "pdflatex"
+  "writeup.aux" 1707452166 5649 1e474e56465a681f113baaaa8f1e3dc5 "pdflatex"
   (generated)
   "writeup.bbl"
   "writeup.blg"
   (rewritten before read)
-["pdflatex"] 1707450688 "writeup.tex" "writeup.pdf" "writeup" 1707450690 0
+["pdflatex"] 1707452164 "writeup.tex" "writeup.pdf" "writeup" 1707452169 2
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/base/8r.enc" 1165713224 4850 80dc9bab7f31fb78a000ccfed0e27cab ""
   "/usr/local/texlive/2023/texmf-dist/fonts/enc/dvips/cm-super/cm-super-t1.enc" 1136849721 2971 def0b6c1f0b107b3b936def894055589 ""
   "/usr/local/texlive/2023/texmf-dist/fonts/map/fontname/texfonts.map" 1577235249 3524 cb3e574dea2d1052e39280babc910dc8 ""
@@ -145,15 +145,15 @@
   "plots/unet.png" 1707449305 64614 f6932204f8547467b207392a4f17c44d ""
   "plots/unet_transfer.png" 1707449305 51877 95dec9dc5ee88d3395997c2d7e7d0e6f ""
   "sections/abstract.tex" 1707368800 882 de31c17f26442d5d492f2c62da921885 ""
-  "sections/contributions.tex" 1707448503 483 8531a7e2276b90e8d97d826c5e2a2e61 ""
+  "sections/contributions.tex" 1707452163 549 7adc6b81d6e8b96fce7f2f15d8440626 ""
   "sections/discussion.tex" 1707450369 3626 07689d8100134fc9a1b3abdf4fa42dc4 ""
   "sections/intro.tex" 1707449330 5696 e6c94fcfe46e313eb973a7ab44a95aec ""
-  "sections/methods.tex" 1707450687 17824 b072d317c0f350596c0c77631e840404 ""
+  "sections/methods.tex" 1707452163 18239 b658e270487e03f87f4720f4c14c370a ""
   "sections/related.tex" 1707427362 1702 ce80d364a837bc119e96f2f8ac2f9d71 ""
   "sections/results.tex" 1707450069 4720 47373224cf54eb6a191f4b6157561fa1 ""
-  "writeup.aux" 1707450690 6053 75c2a99df47f8ddf92b6031585543617 "pdflatex"
-  "writeup.bbl" 1707427226 1413 71572cc797ad6f3cc7b1788ae23ddaa7 "bibtex writeup"
-  "writeup.out" 1707450690 768 597e490fe9e59e721ee3afe27641d80f "pdflatex"
+  "writeup.aux" 1707452166 5649 1e474e56465a681f113baaaa8f1e3dc5 "pdflatex"
+  "writeup.bbl" 1707452163 275 de5ffaf5b665b622658d80bed97ba2a5 "bibtex writeup"
+  "writeup.out" 1707452166 768 597e490fe9e59e721ee3afe27641d80f "pdflatex"
   "writeup.tex" 1707422074 1878 7c77d38a86123cd4855a5f600d6a0d20 ""
   (generated)
   "writeup.aux"

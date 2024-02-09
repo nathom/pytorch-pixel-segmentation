@@ -1,13 +1,14 @@
-darren cook -w --save weight
-darren cook -we --save weight_erf
-darren cook -wu --save weight_unet
-darren cook -w -a avhr --save weight_avhr
-darren cook -w -a vh --save weight_vh
-darren cook -w -a ar --save weight_ar
+# darren cook -nc -nw --epochs 20 --save baseline
+# Improving on baseline
+# darren cook  -nw --epochs 20 --save baseline_cosine
+# darren cook -nc --epochs 20 --save baseline_weights
+# darren cook --epochs 20 --save baseline_weights_cosine
+darren cook -nw -a vh --epochs 20 --save baseline_augmentation
+darren cook -nw -a vh --epochs 20 -fp --save baseline_transfer
 
-darren cook  --save noweight
-darren cook -e --save noweight_erf
-darren cook -u --save noweight_unet
-darren cook  -a avhr --save noweight_avhr
-darren cook  -a vh --save noweight_vh
-darren cook  -a ar --save noweight_ar
+# Special networks
+
+darren cook -e -a vh --epochs 50 --save darrennet
+darren cook -ep -a vh --epochs 50 --save darrennet_transfer
+darren cook -u -a vh --epochs 50 --save unet
+darren cook -smp unet --epochs 50 --save unet_transfer

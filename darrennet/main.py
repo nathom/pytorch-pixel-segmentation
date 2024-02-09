@@ -14,8 +14,8 @@ from torchvision.transforms import v2
 
 from . import theme
 from .basic_fcn import FCN
+from .darren import DarrenNet
 from .dataset import download_data, get_frequency_spectrum, load_dataset
-from .erfnet import ERF
 from .erfnet_imagenet import ERFNet
 from .train import model_test, model_train
 from .unet import UNet
@@ -37,7 +37,9 @@ class MaskToTensor(object):
 def init_weights(model):
     if isinstance(model, nn.Conv2d) or isinstance(model, nn.ConvTranspose2d):
         # torch.nn.init.xavier_uniform_(model.weight.data)
-        torch.nn.init.kaiming_uniform_(model.weight.data, mode='fan_in', nonlinearity='relu')
+        torch.nn.init.kaiming_uniform_(
+            model.weight.data, mode="fan_in", nonlinearity="relu"
+        )
         assert model.bias is not None
         torch.nn.init.normal_(model.bias.data)  # xavier not applicable for biases
 
@@ -184,10 +186,12 @@ def cook(
         pretrained_enc.load_state_dict(new_state_dict)
         pretrained_enc = next(pretrained_enc.children()).encoder
 
-        fcn_model = ERF(num_classes=n_class, input_channels=3, encoder=pretrained_enc)
+        fcn_model = DarrenNet(
+            num_classes=n_class, input_channels=3, encoder=pretrained_enc
+        )
         learning_rate = 5e-4
     elif erfnet:
-        fcn_model = ERF(num_classes=n_class, input_channels=3)
+        fcn_model = DarrenNet(num_classes=n_class, input_channels=3)
         learning_rate = 5e-4
     elif smp_module == "unet++":
         theme.print("Using smp UNet++")
@@ -196,7 +200,7 @@ def cook(
     elif smp_module == "unet":
         theme.print("Using smp UNet")
         fcn_model = smp.create_model("unetplusplus", classes=21)
-        learning_rate = 1e-3
+        learning_rate = 1e-4
     elif smp_module == "linknet":
         theme.print("Using smp LinkNet")
         fcn_model = smp.create_model("linknet", classes=21)
@@ -208,7 +212,7 @@ def cook(
     elif unet_resnet:
         theme.print("using UNet with pretrained ResNet backbone")
         fcn_model = UNetResnet(n_class)
-        learning_rate = 1e-3
+        learning_rate = 1e-4
     elif fcn_pretrained:
         theme.print("Using FCN with resnet backbone")
         fcn_model = FCN(n_class=n_class, resnet_backbone=True)

@@ -1,7 +1,3 @@
-import logging
-from itertools import chain
-
-import numpy as np
 import torch
 import torch.nn as nn
 import torch.nn.functional as F
@@ -40,38 +36,8 @@ def set_trainable(l, b):
     apply_leaf(l, lambda m: set_trainable_attr(m, b))
 
 
-class BaseModel(nn.Module):
-    def __init__(self):
-        super(BaseModel, self).__init__()
-        self.logger = logging.getLogger(self.__class__.__name__)
-
-    def forward(self):
-        raise NotImplementedError
-
-    def summary(self):
-        model_parameters = filter(lambda p: p.requires_grad, self.parameters())
-        nbr_params = sum([np.prod(p.size()) for p in model_parameters])
-        self.logger.info(f"Nbr of trainable parameters: {nbr_params}")
-
-    def __str__(self):
-        model_parameters = filter(lambda p: p.requires_grad, self.parameters())
-        nbr_params = sum([np.prod(p.size()) for p in model_parameters])
-        return (
-            super(BaseModel, self).__str__()
-            + f"\nNbr of trainable parameters: {nbr_params}"
-        )
-        # return summary(self, input_shape=(2, 3, 224, 224))
-
-
-class UNetResnet(BaseModel):
-    def __init__(
-        self,
-        num_classes,
-        in_channels=3,
-        freeze_bn=False,
-        freeze_backbone=False,
-        **_,
-    ):
+class UNetResnet(nn.Module):
+    def __init__(self, num_classes, in_channels=3):
         super(UNetResnet, self).__init__()
         model = resnet50(weights=ResNet50_Weights.DEFAULT, norm_layer=nn.BatchNorm2d)
 
@@ -109,14 +75,6 @@ class UNetResnet(BaseModel):
 
         initialize_weights(self)
 
-        if freeze_bn:
-            self.freeze_bn()
-        if freeze_backbone:
-            set_trainable(
-                [self.initial, self.layer1, self.layer2, self.layer3, self.layer4],
-                False,
-            )
-
     def forward(self, x):
         H, W = x.size(2), x.size(3)
         x1 = self.layer1(self.initial(x))
@@ -153,33 +111,3 @@ class UNetResnet(BaseModel):
 
         x = self.conv7(self.conv6(x))
         return x
-
-    def get_backbone_params(self):
-        return chain(
-            self.initial.parameters(),
-            self.layer1.parameters(),
-            self.layer2.parameters(),
-            self.layer3.parameters(),
-            self.layer4.parameters(),
-        )
-
-    def get_decoder_params(self):
-        return chain(
-            self.conv1.parameters(),
-            self.upconv1.parameters(),
-            self.conv2.parameters(),
-            self.upconv2.parameters(),
-            self.conv3.parameters(),
-            self.upconv3.parameters(),
-            self.conv4.parameters(),
-            self.upconv4.parameters(),
-            self.conv5.parameters(),
-            self.upconv5.parameters(),
-            self.conv6.parameters(),
-            self.conv7.parameters(),
-        )
-
-    def freeze_bn(self):
-        for module in self.modules():
-            if isinstance(module, nn.BatchNorm2d):
-                module.eval()
